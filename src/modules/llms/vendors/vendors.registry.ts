@@ -13,12 +13,12 @@ import { DLLMId, DModelSource, DModelSourceId, findLLMOrThrow } from '../store-l
 
 /** Global: Vendor Instances Registry **/
 const MODEL_VENDOR_REGISTRY: ModelVendorRegistryType = {
-  anthropic: ModelVendorAnthropic,
-  azure: ModelVendorAzure,
-  localai: ModelVendorLocalAI,
-  mistral: ModelVendorMistral,
-  ollama: ModelVendorOllama,
-  oobabooga: ModelVendorOoobabooga,
+  // anthropic: ModelVendorAnthropic,
+  // azure: ModelVendorAzure,
+  // localai: ModelVendorLocalAI,
+  // mistral: ModelVendorMistral,
+  // ollama: ModelVendorOllama,
+  // oobabooga: ModelVendorOoobabooga,
   openai: ModelVendorOpenAI,
   openrouter: ModelVendorOpenRouter,
   commune: ModelVendorCommune,
