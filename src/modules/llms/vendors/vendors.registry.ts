@@ -7,6 +7,7 @@ import { ModelVendorOoobabooga } from './oobabooga/oobabooga.vendor';
 import { ModelVendorOpenAI } from './openai/openai.vendor';
 import { ModelVendorOpenRouter } from './openrouter/openrouter.vendor';
 import { ModelVendorCommune } from './commune/commune.vendor';
+import { ModelVendorHf } from './hf/hf.vendor';
 
 import type { IModelVendor, ModelVendorId, ModelVendorRegistryType } from './IModelVendor';
 import { DLLMId, DModelSource, DModelSourceId, findLLMOrThrow } from '../store-llms';
@@ -22,6 +23,7 @@ const MODEL_VENDOR_REGISTRY: ModelVendorRegistryType = {
   openai: ModelVendorOpenAI,
   openrouter: ModelVendorOpenRouter,
   commune: ModelVendorCommune,
+  hf: ModelVendorHf,
 };
 
 const MODEL_VENDOR_DEFAULT: ModelVendorId = 'openai';

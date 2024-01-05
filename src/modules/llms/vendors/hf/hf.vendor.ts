@@ -1,7 +1,7 @@
 import { backendCaps } from '~/modules/backend/state-backend';
 
 import { OpenRouterIcon } from '~/common/components/icons/OpenRouterIcon';
-import { CommuneIcon } from '~/common/components/icons/CommuneIcon';
+import { HfIcon } from '~/common/components/icons/HfIcon';
 
 import type { IModelVendor } from '../IModelVendor';
 import type { OpenAIAccessSchema } from '../../transports/server/openai/openai.router';
@@ -10,7 +10,7 @@ import type { VChatFunctionIn, VChatMessageIn, VChatMessageOrFunctionCallOut, VC
 import { LLMOptionsOpenAI, openAICallChatGenerate } from '../openai/openai.vendor';
 import { OpenAILLMOptions } from '../openai/OpenAILLMOptions';
 
-import { CommuneSourceSetup } from './CommuneSourceSetup';
+import { HfSourceSetup } from './HfSourceSetup';
 
 
 // special symbols
@@ -33,18 +33,18 @@ export interface SourceSetupOpenRouter {
  *  [x] decide whether to do UI work to improve the appearance - prioritized models
  *  [x] works!
  */
-export const ModelVendorCommune: IModelVendor<SourceSetupOpenRouter, OpenAIAccessSchema, LLMOptionsOpenAI> = {
-  id: 'commune',
-  name: 'Commune',
-  rank: 9,
+export const ModelVendorHf: IModelVendor<SourceSetupOpenRouter, OpenAIAccessSchema, LLMOptionsOpenAI> = {
+  id: 'hf',
+  name: 'Hugging Face',
+  rank: 10,
   location: 'cloud',
   instanceLimit: 1,
-  hasFreeModels: true,
+  // hasFreeModels: true,
   hasBackendCap: () => backendCaps().hasLlmOpenRouter,
 
   // components
-  Icon: CommuneIcon,
-  SourceSetupComponent: CommuneSourceSetup,
+  Icon: HfIcon,
+  SourceSetupComponent: HfSourceSetup,
   LLMOptionsComponent: OpenAILLMOptions,
 
   // functions

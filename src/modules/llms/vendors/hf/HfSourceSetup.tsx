@@ -12,19 +12,19 @@ import { getCallbackUrl } from '~/common/app.routes';
 import { DModelSourceId, useModelsStore, useSourceSetup } from '../../store-llms';
 import { modelDescriptionToDLLM } from '../openai/OpenAISourceSetup';
 
-import { isValidOpenRouterKey, ModelVendorCommune } from './commune.vendor';
+import { isValidOpenRouterKey, ModelVendorHf } from './hf.vendor';
 
 
-export function CommuneSourceSetup(props: { sourceId: DModelSourceId }) {
+export function HfSourceSetup(props: { sourceId: DModelSourceId }) {
 
   // external state
   const { source, sourceHasLLMs, access, updateSetup } =
-    useSourceSetup(props.sourceId, ModelVendorCommune);
+    useSourceSetup(props.sourceId, ModelVendorHf);
 
   // derived state
   const { oaiKey } = access;
 
-  const needsUserKey = !ModelVendorCommune.hasBackendCap?.();
+  const needsUserKey = !ModelVendorHf.hasBackendCap?.();
   const keyValid = isValidOpenRouterKey(oaiKey);
   const keyError = (/*needsUserKey ||*/ !!oaiKey) && !keyValid;
   const shallFetchSucceed = oaiKey ? keyValid : !needsUserKey;
@@ -50,10 +50,10 @@ export function CommuneSourceSetup(props: { sourceId: DModelSourceId }) {
 
 
   return <>
-Commune is a protocol that aims to connect all developer tools into one network, fostering a more shareable, reusable, and open economy.
-    <Typography level='body-sm'>
+    The collaboration platform. Host and collaborate on unlimited models, datasets and applications. Hub activity feed. Move faster.
+    {/* <Typography level='body-sm'>
       <Link href='https://commune-t.pages.dev' target='_blank'>Commune</Link> is a protocol that aims to connect all developer tools into one network, fostering a more shareable, reusable, and open economy.
-    </Typography>
+    </Typography> */}
 
     {/* <FormInputKey
       id='openrouter-key' label='OpenRouter API Key'
