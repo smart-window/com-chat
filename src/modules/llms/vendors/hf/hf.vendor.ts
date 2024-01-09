@@ -14,7 +14,7 @@ import { HfSourceSetup } from './HfSourceSetup';
 
 
 // special symbols
-export const isValidOpenRouterKey = (apiKey?: string) => !!apiKey && apiKey.startsWith('sk-or-') && apiKey.length > 40;
+export const isValidHFKey = (apiKey?: string) => !!apiKey && apiKey.startsWith('hf_') && apiKey.length > 30;
 
 // use OpenAI-compatible host and key
 export interface SourceSetupOpenRouter {
@@ -49,11 +49,11 @@ export const ModelVendorHf: IModelVendor<SourceSetupOpenRouter, OpenAIAccessSche
 
   // functions
   initializeSetup: (): SourceSetupOpenRouter => ({
-    oaiHost: 'https://openrouter.ai/api',
+    oaiHost: 'https://huggingface.co/api',
     oaiKey: '',
   }),
   getTransportAccess: (partialSetup): OpenAIAccessSchema => ({
-    dialect: 'openrouter',
+    dialect: 'hf',
     oaiKey: partialSetup?.oaiKey || '',
     oaiOrg: '',
     oaiHost: partialSetup?.oaiHost || '',

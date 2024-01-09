@@ -12,7 +12,7 @@ import { getCallbackUrl } from '~/common/app.routes';
 import { DModelSourceId, useModelsStore, useSourceSetup } from '../../store-llms';
 import { modelDescriptionToDLLM } from '../openai/OpenAISourceSetup';
 
-import { isValidOpenRouterKey, ModelVendorHf } from './hf.vendor';
+import { isValidHFKey, ModelVendorHf } from './hf.vendor';
 
 
 export function HfSourceSetup(props: { sourceId: DModelSourceId }) {
@@ -25,7 +25,7 @@ export function HfSourceSetup(props: { sourceId: DModelSourceId }) {
   const { oaiKey } = access;
 
   const needsUserKey = !ModelVendorHf.hasBackendCap?.();
-  const keyValid = isValidOpenRouterKey(oaiKey);
+  const keyValid = isValidHFKey(oaiKey);
   const keyError = (/*needsUserKey ||*/ !!oaiKey) && !keyValid;
   const shallFetchSucceed = oaiKey ? keyValid : !needsUserKey;
 
@@ -39,11 +39,9 @@ export function HfSourceSetup(props: { sourceId: DModelSourceId }) {
     staleTime: Infinity,
   });
 
-
-  const handleOpenRouterLogin = () => {
+  const handleHuggingFaceLogin = () => {
     // replace the current page with the OAuth page
-    const callbackUrl = getCallbackUrl('openrouter');
-    const oauthUrl = 'https://openrouter.ai/auth?callback_url=' + encodeURIComponent(callbackUrl);
+    const oauthUrl = 'https://huggingface.co/';
     window.open(oauthUrl, '_self');
     // ...bye / see you soon at the callback location...
   };
@@ -55,35 +53,35 @@ export function HfSourceSetup(props: { sourceId: DModelSourceId }) {
       <Link href='https://commune-t.pages.dev' target='_blank'>Commune</Link> is a protocol that aims to connect all developer tools into one network, fostering a more shareable, reusable, and open economy.
     </Typography> */}
 
-    {/* <FormInputKey
-      id='openrouter-key' label='OpenRouter API Key'
+    <FormInputKey
+      id='hf-key' label='Hugging Face API Key'
       rightLabel={<>{needsUserKey
-        ? !oaiKey && <Link level='body-sm' href='https://openrouter.ai/keys' target='_blank'>your keys</Link>
+        ? !oaiKey && <Link level='body-sm' href='https://huggingface.co/settings/tokens' target='_blank'>your keys</Link>
         : '✔️ already set in server'
-      } {oaiKey && keyValid && <Link level='body-sm' href='https://openrouter.ai/activity' target='_blank'>check usage</Link>}
+      }
       </>}
       value={oaiKey} onChange={value => updateSetup({ oaiKey: value })}
       required={needsUserKey} isError={keyError}
-      placeholder='sk-or-...'
-    /> */}
+      placeholder='hf_...'
+    />
 
-    {/* <Typography level='body-sm'>
-      🎁 A selection of <Link href='https://openrouter.ai/docs#models' target='_blank'>OpenRouter models</Link> are
+    <Typography level='body-sm'>
+      A selection of <Link href='https://huggingface.co/models' target='_blank'>Hugging Face models</Link> are
       made available without charge. You can get an API key by using the Login button below.
-    </Typography> */}
+    </Typography>
 
-    {/* <SetupFormRefetchButton
+    <SetupFormRefetchButton
       refetch={refetch} disabled={!shallFetchSucceed || isFetching} error={isError}
       leftButton={
         <Button
           color='neutral' variant={(needsUserKey && !keyValid) ? 'solid' : 'outlined'}
-          onClick={handleOpenRouterLogin}
+          onClick={handleHuggingFaceLogin}
           endDecorator={(needsUserKey && !keyValid) ? '🎁' : undefined}
         >
-          OpenRouter Login
+          Hugging Face Login
         </Button>
       }
-    /> */}
+    />
 
     {isError && <InlineError error={error} />}
 

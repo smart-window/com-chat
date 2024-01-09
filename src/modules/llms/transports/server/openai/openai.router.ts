@@ -14,7 +14,7 @@ import { localAIModelToModelDescription, mistralModelsSort, mistralModelToModelD
 
 // Input Schemas
 
-const openAIDialects = z.enum(['azure', 'localai', 'mistral', 'oobabooga', 'openai', 'openrouter']);
+const openAIDialects = z.enum(['azure', 'localai', 'mistral', 'oobabooga', 'openai', 'openrouter', 'hf']);
 
 export const openAIAccessSchema = z.object({
   dialect: openAIDialects,
@@ -198,6 +198,12 @@ export const llmOpenAIRouter = createTRPCRouter({
             .map(model => openRouterModelToModelDescription(model.id, model.created, (model as any)?.['context_length']));
           break;
 
+        case 'hf':
+          models = openAIModels
+            .sort(openRouterModelFamilySortFn)
+            .map(model => openRouterModelToModelDescription(model.id, model.created, (model as any)?.['context_length']));
+          break;
+
       }
 
       return { models };
@@ -277,6 +283,7 @@ const DEFAULT_HELICONE_OPENAI_HOST = 'oai.hconeai.com';
 const DEFAULT_MISTRAL_HOST = 'https://api.mistral.ai';
 const DEFAULT_OPENAI_HOST = 'api.openai.com';
 const DEFAULT_OPENROUTER_HOST = 'https://openrouter.ai/api';
+const DEFAULT_HF_HOST = 'https://huggingface.co/api';
 
 export function fixupHost(host: string, apiPath: string): string {
   if (!host.startsWith('http'))
@@ -396,6 +403,23 @@ export function openAIAccess(access: OpenAIAccessSchema, modelRefId: string | nu
           'X-Title': Brand.Title.Base,
         },
         url: orHost + apiPath,
+      };
+
+
+    case 'hf':
+      const hfKey = access.oaiKey || env.HF_API_KEY || '';
+      const hfHost = fixupHost(access.oaiHost || DEFAULT_HF_HOST, apiPath);
+      if (!hfKey || !hfHost)
+        throw new Error('Missing Hugging Face API Key or Host. Add it on the UI (Models Setup) or server side (your deployment).');
+
+      return {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${hfKey}`,
+          'HTTP-Referer': Brand.URIs.Home,
+          'X-Title': Brand.Title.Base,
+        },
+        url: hfHost + apiPath,
       };
   }
 }
