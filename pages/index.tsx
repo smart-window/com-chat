@@ -1,18 +1,29 @@
-import * as React from 'react';
+import { useEffect, useState } from 'react';
+import firebase from '../config/firebase';
 
-import { AppChat } from '../src/apps/chat/AppChat';
 import { useShowNewsOnUpdate } from '../src/apps/news/news.hooks';
 
-import { AppLayout } from '~/common/layout/AppLayout';
+import SignInPage from './signin';
+import ChatPage from './chat';
 
-
-export default function ChatPage() {
+export default function MainPage() {
   // show the News page on updates
   useShowNewsOnUpdate();
 
+  const [isSignedIn, setIsSignedIn] = useState(false); // Local signed-in state.
+
+  // Listen to the Firebase Auth state and set the local state.
+  useEffect(() => {
+    const unregisterAuthObserver = firebase.auth().onAuthStateChanged(user => {
+      setIsSignedIn(!!user);
+    });
+    return () => unregisterAuthObserver(); // Make sure we un-register Firebase observers when the component unmounts.
+  }, []);
+
+  if (!isSignedIn) {
+    return <SignInPage />
+  }
   return (
-    <AppLayout>
-      <AppChat />
-    </AppLayout>
+    <ChatPage />
   );
 }

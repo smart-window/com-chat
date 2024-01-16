@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 let nextConfig = {
-  reactStrictMode: true,
+  reactStrictMode: false,
 
   // Note: disabled to chech whether the project becomes slower with this
   // modularizeImports: {
