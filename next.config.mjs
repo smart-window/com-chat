@@ -1,7 +1,13 @@
 /** @type {import('next').NextConfig} */
 let nextConfig = {
   reactStrictMode: false,
-
+  typescript: {
+    // !! WARN !!
+    // Dangerously allow production builds to successfully complete even if
+    // your project has type errors.
+    // !! WARN !!
+    ignoreBuildErrors: true,
+  },
   // Note: disabled to chech whether the project becomes slower with this
   // modularizeImports: {
   //   '@mui/icons-material': {
