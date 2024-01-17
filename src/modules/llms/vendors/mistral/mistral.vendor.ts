@@ -47,6 +47,7 @@ export const ModelVendorMistral: IModelVendor<SourceSetupMistral, OpenAIAccessSc
     oaiHost: partialSetup?.oaiHost || '',
     heliKey: '',
     moderationCheck: false,
+    defaultCheck: false,
   }),
   callChatGenerate(llm, messages: VChatMessageIn[], maxTokens?: number): Promise<VChatMessageOut> {
     return openAICallChatGenerate(this.getTransportAccess(llm._source.setup), llm.options, messages, null, null, maxTokens);

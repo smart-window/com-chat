@@ -20,6 +20,7 @@ export interface SourceSetupOpenAI {
   oaiHost: string;  // use OpenAI-compatible non-default hosts (full origin path)
   heliKey: string;  // helicone key (works in conjunction with oaiHost)
   moderationCheck: boolean;
+  defaultCheck: boolean;
 }
 
 export interface LLMOptionsOpenAI {
@@ -49,6 +50,7 @@ export const ModelVendorOpenAI: IModelVendor<SourceSetupOpenAI, OpenAIAccessSche
     oaiHost: '',
     heliKey: '',
     moderationCheck: false,
+    defaultCheck: true,
     ...partialSetup,
   }),
   callChatGenerate(llm, messages: VChatMessageIn[], maxTokens?: number): Promise<VChatMessageOut> {

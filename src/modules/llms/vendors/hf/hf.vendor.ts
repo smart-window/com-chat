@@ -59,6 +59,7 @@ export const ModelVendorHf: IModelVendor<SourceSetupOpenRouter, OpenAIAccessSche
     oaiHost: partialSetup?.oaiHost || '',
     heliKey: '',
     moderationCheck: false,
+    defaultCheck: false,
   }),
   callChatGenerate(llm, messages: VChatMessageIn[], maxTokens?: number): Promise<VChatMessageOut> {
     return openAICallChatGenerate(this.getTransportAccess(llm._source.setup), llm.options, messages, null, null, maxTokens);

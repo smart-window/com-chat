@@ -23,6 +23,7 @@ export const openAIAccessSchema = z.object({
   oaiHost: z.string().trim(),
   heliKey: z.string().trim(),
   moderationCheck: z.boolean(),
+  defaultCheck: z.boolean(),
 });
 export type OpenAIAccessSchema = z.infer<typeof openAIAccessSchema>;
 
@@ -324,12 +325,12 @@ export function openAIAccess(access: OpenAIAccessSchema, modelRefId: string | nu
     case 'localai':
     case 'oobabooga':
     case 'openai':
-      const oaiKey = access.oaiKey || env.OPENAI_API_KEY || '';
+      const oaiKey = access.defaultCheck ? (env.OPENAI_API_KEY || '') : (access.oaiKey || '');
       const oaiOrg = access.oaiOrg || env.OPENAI_API_ORG_ID || '';
       let oaiHost = fixupHost(access.oaiHost || env.OPENAI_API_HOST || DEFAULT_OPENAI_HOST, apiPath);
       // warn if no key - only for default (non-overridden) hosts
       if (!oaiKey && oaiHost.indexOf(DEFAULT_OPENAI_HOST) !== -1)
-        throw new Error('Missing OpenAI API Key. Add it on the UI (Models Setup) or server side (your deployment).');
+        throw new Error('Missing OpenAI API Key. Add it on the UI (Models Setup) or use default system api key.');
 
       // [Helicone]
       // We don't change the host (as we do on Anthropic's), as we expect the user to have a custom host.

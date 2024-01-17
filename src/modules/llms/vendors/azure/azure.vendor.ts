@@ -57,6 +57,7 @@ export const ModelVendorAzure: IModelVendor<SourceSetupAzure, OpenAIAccessSchema
     oaiHost: partialSetup?.azureEndpoint || '',
     heliKey: '',
     moderationCheck: false,
+    defaultCheck: false,
   }),
   callChatGenerate(llm, messages: VChatMessageIn[], maxTokens?: number): Promise<VChatMessageOut> {
     return openAICallChatGenerate(this.getTransportAccess(llm._source.setup), llm.options, messages, null, null, maxTokens);

@@ -14,13 +14,14 @@ export function SetupFormRefetchButton(props: {
   disabled: boolean, error: boolean,
   leftButton?: React.ReactNode,
   advanced?: ToggleableBoolean
+  defaultCheck?: boolean
 }) {
   return (
     <Box sx={{ display: 'flex', alignItems: 'end', justifyContent: 'space-between' }}>
 
       {props.leftButton}
 
-      {!!props.advanced && (
+      {(!!props.advanced && !props.defaultCheck) && (
         <FormLabel onClick={props.advanced.toggle} sx={{ textDecoration: 'underline', cursor: 'pointer' }}>
           {props.advanced.on ? 'Hide Advanced' : 'Advanced'}
         </FormLabel>
