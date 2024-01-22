@@ -5,7 +5,7 @@ const { createServer } = require("https");
 const http = require("http");
 const { parse } = require("url");
 
-const dev = process.env.NODE_ENV !== "production";
+const dev = false;
 const app = next({ dev });
 const handle = app.getRequestHandler();
 
