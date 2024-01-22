@@ -15,7 +15,6 @@ export const Brand = {
     Description: 'Launch COM-Chat to unlock the full potential of AI, with precise control over your data and models. Voice interface, AI personas, advanced features, and fun UX.',
     SiteName: 'COM-Chat | Precision AI for You',
     ThemeColor: '#32383E',
-    TwitterSite: '@enricoros',
   },
   URIs: {
     Home: 'https://comchat.io',
@@ -23,7 +22,6 @@ export const Brand = {
     OpenRepo: 'https://github.com/smart-window/com-chat',
     OpenProject: 'https://github.com/smart-window',
     SupportInvite: 'https://discord.gg/sWRZPrVhwC',
-    // Twitter: 'https://www.twitter.com/enricoros',
     PrivacyPolicy: 'https://comchat.io/privacy',
   },
 };
