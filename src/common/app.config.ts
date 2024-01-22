@@ -8,8 +8,8 @@
  */
 export const Brand = {
   Title: {
-    Base: 'COM-Chat',
-    Common: (process.env.NODE_ENV === 'development' ? '[DEV] ' : '') + 'COM-Chat',
+    Base: 'COM Chat',
+    Common: (process.env.NODE_ENV === 'development' ? '[DEV] ' : '') + 'COM Chat',
   },
   Meta: {
     Description: 'Launch COM-Chat to unlock the full potential of AI, with precise control over your data and models. Voice interface, AI personas, advanced features, and fun UX.',
