@@ -6,11 +6,11 @@ import { FormInputKey } from '~/common/components/forms/FormInputKey';
 import { InlineError } from '~/common/components/InlineError';
 import { Link } from '~/common/components/Link';
 import { SetupFormRefetchButton } from '~/common/components/forms/SetupFormRefetchButton';
-import { apiQuery } from '~/common/util/trpc.client';
 import { getCallbackUrl } from '~/common/app.routes';
 
-import { DModelSourceId, useModelsStore, useSourceSetup } from '../../store-llms';
-import { modelDescriptionToDLLM } from '../openai/OpenAISourceSetup';
+import { DModelSourceId } from '../../store-llms';
+import { useLlmUpdateModels } from '../useLlmUpdateModels';
+import { useSourceSetup } from '../useSourceSetup';
 
 import { isValidOpenRouterKey, ModelVendorOpenRouter } from './openrouter.vendor';
 
@@ -30,14 +30,8 @@ export function OpenRouterSourceSetup(props: { sourceId: DModelSourceId }) {
   const shallFetchSucceed = oaiKey ? keyValid : !needsUserKey;
 
   // fetch models
-  const { isFetching, refetch, isError, error } = apiQuery.llmOpenAI.listModels.useQuery({ access }, {
-    enabled: !sourceHasLLMs && shallFetchSucceed,
-    onSuccess: models => source && useModelsStore.getState().setLLMs(
-      models.models.map(model => modelDescriptionToDLLM(model, source)),
-      props.sourceId,
-    ),
-    staleTime: Infinity,
-  });
+  const { isFetching, refetch, isError, error } =
+    useLlmUpdateModels(ModelVendorOpenRouter, access, !sourceHasLLMs && shallFetchSucceed, source);
 
 
   const handleOpenRouterLogin = () => {
@@ -55,7 +49,7 @@ export function OpenRouterSourceSetup(props: { sourceId: DModelSourceId }) {
       <Link href='https://openrouter.ai/keys' target='_blank'>OpenRouter</Link> is an independent service
       granting access to <Link href='https://openrouter.ai/docs#models' target='_blank'>exclusive models</Link> such
       as GPT-4 32k, Claude, and more. <Link
-      href='https://github.com/smart-window/com-chat' target='_blank'>
+      href='https://github.com/smart-window/com-chat/blob/main/docs/config-openrouter.md' target='_blank'>
       Configuration &amp; documentation</Link>.
     </Typography>
 
@@ -77,7 +71,7 @@ export function OpenRouterSourceSetup(props: { sourceId: DModelSourceId }) {
     </Typography>
 
     <SetupFormRefetchButton
-      refetch={refetch} disabled={!shallFetchSucceed || isFetching} error={isError}
+      refetch={refetch} disabled={!shallFetchSucceed || isFetching} loading={isFetching} error={isError}
       leftButton={
         <Button
           color='neutral' variant={(needsUserKey && !keyValid) ? 'solid' : 'outlined'}

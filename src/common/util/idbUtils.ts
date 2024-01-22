@@ -9,6 +9,12 @@ export const IDB_MIGRATION_INITIAL = -1;
 export const idbStateStorage: StateStorage = {
   getItem: async (name: string): Promise<string | null> => {
     const value = await get(name);
+    /* IMPORTANT!
+     * We modify the default behavior of `getItem` to return a {version: -1} object if a key is not found.
+     * This is to trigger the migration across state storage implementations, as Zustand would not call the
+     * 'migrate' function otherwise.
+     * See 'https://github.com/smart-window/com-chat/pull/158' for more details
+     */
     if (value === undefined) {
       return JSON.stringify({
         version: IDB_MIGRATION_INITIAL,

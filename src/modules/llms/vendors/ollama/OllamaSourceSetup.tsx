@@ -6,13 +6,14 @@ import { FormTextField } from '~/common/components/forms/FormTextField';
 import { InlineError } from '~/common/components/InlineError';
 import { Link } from '~/common/components/Link';
 import { SetupFormRefetchButton } from '~/common/components/forms/SetupFormRefetchButton';
-import { apiQuery } from '~/common/util/trpc.client';
 import { asValidURL } from '~/common/util/urlUtils';
 
-import { DModelSourceId, useModelsStore, useSourceSetup } from '../../store-llms';
+import { DModelSourceId } from '../../store-llms';
+import { useLlmUpdateModels } from '../useLlmUpdateModels';
+import { useSourceSetup } from '../useSourceSetup';
+
 import { ModelVendorOllama } from './ollama.vendor';
 import { OllamaAdministration } from './OllamaAdministration';
-import { modelDescriptionToDLLM } from '../openai/OpenAISourceSetup';
 
 
 export function OllamaSourceSetup(props: { sourceId: DModelSourceId }) {
@@ -32,20 +33,14 @@ export function OllamaSourceSetup(props: { sourceId: DModelSourceId }) {
   const shallFetchSucceed = !hostError;
 
   // fetch models
-  const { isFetching, refetch, isError, error } = apiQuery.llmOllama.listModels.useQuery({ access }, {
-    enabled: false, // !sourceHasLLMs && shallFetchSucceed,
-    onSuccess: models => source && useModelsStore.getState().setLLMs(
-      models.models.map(model => modelDescriptionToDLLM(model, source)),
-      props.sourceId,
-    ),
-    staleTime: Infinity,
-  });
+  const { isFetching, refetch, isError, error } =
+    useLlmUpdateModels(ModelVendorOllama, access, false /* !sourceHasLLMs && shallFetchSucceed */, source);
 
   return <>
 
     <FormTextField
       title='Ollama Host'
-      description={<Link level='body-sm' href='https://github.com/smart-window/com-chat' target='_blank'>information</Link>}
+      description={<Link level='body-sm' href='https://github.com/smart-window/com-chat/blob/main/docs/config-ollama.md' target='_blank'>information</Link>}
       placeholder='http://127.0.0.1:11434'
       isError={hostError}
       value={ollamaHost || ''}
@@ -53,7 +48,7 @@ export function OllamaSourceSetup(props: { sourceId: DModelSourceId }) {
     />
 
     <SetupFormRefetchButton
-      refetch={refetch} disabled={!shallFetchSucceed || isFetching} error={isError}
+      refetch={refetch} disabled={!shallFetchSucceed || isFetching} loading={isFetching} error={isError}
       leftButton={
         <Button color='neutral' variant='solid' disabled={adminOpen} onClick={() => setAdminOpen(true)}>
           Ollama Admin

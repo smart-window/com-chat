@@ -11,9 +11,11 @@ import type { ToggleableBoolean } from '~/common/util/useToggleableBoolean';
  */
 export function SetupFormRefetchButton(props: {
   refetch: () => void,
-  disabled: boolean, error: boolean,
+  disabled: boolean,
+  loading: boolean,
+  error: boolean,
   leftButton?: React.ReactNode,
-  advanced?: ToggleableBoolean
+  advanced?: ToggleableBoolean,
   defaultCheck?: boolean
 }) {
   return (
@@ -30,6 +32,7 @@ export function SetupFormRefetchButton(props: {
       <Button
         color={props.error ? 'warning' : 'primary'}
         disabled={props.disabled}
+        loading={props.loading}
         endDecorator={<SyncIcon />}
         onClick={props.refetch}
         sx={{ minWidth: 120, ml: 'auto' }}

@@ -28,7 +28,8 @@ export const countModelTokens: (text: string, llmId: DLLMId, debugFrom: string) 
       }
     }
     let count: number = 0;
-
+    // Note: the try/catch shouldn't be necessary, but there could be corner cases where the tiktoken library throws
+    // https://github.com/smart-window/com-chat/issues/182
     try {
       count = tokenEncoders[openaiModel]?.encode(text, 'all', [])?.length || 0;
     } catch (e) {

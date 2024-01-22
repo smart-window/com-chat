@@ -1,16 +1,17 @@
-import { AppChat } from '../src/apps/chat/AppChat';
-import { useShowNewsOnUpdate } from '../src/apps/news/news.hooks';
+import * as React from 'react';
 
-import { AppLayout } from '~/common/layout/AppLayout';
+import { AppChat } from '../src/apps/chat/AppChat';
+import { useRedirectToNewsOnUpdates } from '../src/apps/news/news.hooks';
+
+import { withLayout } from '~/common/layout/withLayout';
 
 
 export default function ChatPage() {
-    // show the News page on updates
-    useShowNewsOnUpdate();
+  // show the News page if there are unseen updates
+  useRedirectToNewsOnUpdates();
 
-    return (
-        <AppLayout>
-            <AppChat />
-        </AppLayout>
-    );
+  // TODO: This Index page will point to the Dashboard (or a landing page) soon
+  // For now it offers the chat experience, but this will change. #299
+
+  return withLayout({ type: 'optima' }, <AppChat />);
 }

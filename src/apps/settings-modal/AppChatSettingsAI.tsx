@@ -40,7 +40,7 @@ export function AppChatSettingsAI() {
     <FormControl disabled orientation='horizontal' sx={{ justifyContent: 'space-between' }}>
       <FormLabelStart title='Auto Questions'
                       description={autoSuggestQuestions ? 'LLM Questions' : 'Disabled'}
-                      tooltip={<>Vote <Link href='https://github.com/smart-window/com-chat' target='_blank'>#228</Link></>} />
+                      tooltip={<>Vote <Link href='https://github.com/smart-window/com-chat/issues/228' target='_blank'>#228</Link></>} />
       <Switch checked={autoSuggestQuestions} onChange={handleAutoSuggestQuestionsChange}
               endDecorator={autoSuggestQuestions ? 'On' : 'Off'}
               slotProps={{ endDecorator: { sx: { minWidth: 26 } } }} />
@@ -49,7 +49,7 @@ export function AppChatSettingsAI() {
     <FormControl disabled orientation='horizontal' sx={{ justifyContent: 'space-between' }}>
       <FormLabelStart title='Auto UI'
                       description={autoSuggestQuestions ? 'LLM User Interface' : 'Disabled'}
-                      tooltip={<>Vote <Link href='https://github.com/smart-window/com-chat' target='_blank'>#227</Link></>} />
+                      tooltip={<>Vote <Link href='https://github.com/smart-window/com-chat/issues/227' target='_blank'>#227</Link></>} />
       <Switch endDecorator={autoSuggestQuestions ? 'On' : 'Off'}
               slotProps={{ endDecorator: { sx: { minWidth: 26 } } }} />
     </FormControl>

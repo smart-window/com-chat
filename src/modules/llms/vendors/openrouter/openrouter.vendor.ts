@@ -3,10 +3,9 @@ import { backendCaps } from '~/modules/backend/state-backend';
 import { OpenRouterIcon } from '~/common/components/icons/OpenRouterIcon';
 
 import type { IModelVendor } from '../IModelVendor';
-import type { OpenAIAccessSchema } from '../../transports/server/openai/openai.router';
-import type { VChatFunctionIn, VChatMessageIn, VChatMessageOrFunctionCallOut, VChatMessageOut } from '../../transports/chatGenerate';
+import type { OpenAIAccessSchema } from '../../server/openai/openai.router';
 
-import { LLMOptionsOpenAI, openAICallChatGenerate } from '../openai/openai.vendor';
+import { LLMOptionsOpenAI, ModelVendorOpenAI } from '../openai/openai.vendor';
 import { OpenAILLMOptions } from '../openai/OpenAILLMOptions';
 
 import { OpenRouterSourceSetup } from './OpenRouterSourceSetup';
@@ -38,7 +37,7 @@ export const ModelVendorOpenRouter: IModelVendor<SourceSetupOpenRouter, OpenAIAc
   rank: 12,
   location: 'cloud',
   instanceLimit: 1,
-  // hasFreeModels: true,
+  hasFreeModels: true,
   hasBackendCap: () => backendCaps().hasLlmOpenRouter,
 
   // components
@@ -58,12 +57,32 @@ export const ModelVendorOpenRouter: IModelVendor<SourceSetupOpenRouter, OpenAIAc
     oaiHost: partialSetup?.oaiHost || '',
     heliKey: '',
     moderationCheck: false,
-    defaultCheck: true,
+    defaultCheck: false,
   }),
-  callChatGenerate(llm, messages: VChatMessageIn[], maxTokens?: number): Promise<VChatMessageOut> {
-    return openAICallChatGenerate(this.getTransportAccess(llm._source.setup), llm.options, messages, null, null, maxTokens);
+
+  // there is delay for OpenRouter Free API calls
+  getRateLimitDelay: (llm) => {
+    const now = Date.now();
+    const elapsed = now - nextGenerationTs;
+    const wait = llm.isFree
+      ? 5000 + 100 /* 5 seconds for free call, plus some safety margin */
+      : 100;
+
+    if (elapsed < wait) {
+      const delay = wait - elapsed;
+      nextGenerationTs = now + delay;
+      return delay;
+    } else {
+      nextGenerationTs = now;
+      return 0;
+    }
   },
-  callChatGenerateWF(llm, messages: VChatMessageIn[], functions: VChatFunctionIn[] | null, forceFunctionName: string | null, maxTokens?: number): Promise<VChatMessageOrFunctionCallOut> {
-    return openAICallChatGenerate(this.getTransportAccess(llm._source.setup), llm.options, messages, functions, forceFunctionName, maxTokens);
-  },
+
+  // OpenAI transport ('openrouter' dialect in 'access')
+  rpcUpdateModelsQuery: ModelVendorOpenAI.rpcUpdateModelsQuery,
+  rpcChatGenerateOrThrow: ModelVendorOpenAI.rpcChatGenerateOrThrow,
+  streamingChatGenerateOrThrow: ModelVendorOpenAI.streamingChatGenerateOrThrow,
 };
+
+// rate limit timestamp
+let nextGenerationTs = 0;
