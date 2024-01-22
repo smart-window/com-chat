@@ -28,6 +28,6 @@ app.prepare().then(() => {
         handle(req, res, parsedUrl);
     }).listen(port, (err) => {
         if (err) throw err;
-        console.log(`> Server started on https://localhost:${port}`);
+        console.log(`> Server started on https://localhost:${port}. Mode: ${dev ? "dev" : "prod"}`);
     });
 });
