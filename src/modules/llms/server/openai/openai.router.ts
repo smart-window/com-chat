@@ -411,10 +411,10 @@ export function openAIAccess(access: OpenAIAccessSchema, modelRefId: string | nu
 
 
     case 'openrouter':
-      const orKey = access.oaiKey || env.OPENROUTER_API_KEY || '';
+      const orKey = access.defaultCheck ? (env.OPENROUTER_API_KEY || '') : (access.oaiKey || '');
       const orHost = fixupHost(access.oaiHost || DEFAULT_OPENROUTER_HOST, apiPath);
       if (!orKey || !orHost)
-        throw new Error('Missing OpenRouter API Key or Host. Add it on the UI (Models Setup) or server side (your deployment).');
+        throw new Error('Missing OpenRouter API Key or Host. Add it on the UI (Models Setup) or use default system api key.');
 
       return {
         headers: {

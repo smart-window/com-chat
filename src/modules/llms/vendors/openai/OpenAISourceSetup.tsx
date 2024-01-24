@@ -105,8 +105,7 @@ export function OpenAISourceSetup(props: { sourceId: DModelSourceId }) {
         checked={moderationCheck}
         onChange={on => updateSetup({ moderationCheck: on })}
       />}
-    </>
-    }
+    </>}
 
     <SetupFormRefetchButton defaultCheck={defaultCheck} refetch={refetch} disabled={isFetching} error={isError} loading={isFetching} advanced={advanced} />
 

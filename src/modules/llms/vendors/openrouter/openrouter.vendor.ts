@@ -18,6 +18,7 @@ export const isValidOpenRouterKey = (apiKey?: string) => !!apiKey && apiKey.star
 export interface SourceSetupOpenRouter {
   oaiKey: string;
   oaiHost: string;
+  defaultCheck: boolean;
 }
 
 /**
@@ -49,15 +50,16 @@ export const ModelVendorOpenRouter: IModelVendor<SourceSetupOpenRouter, OpenAIAc
   initializeSetup: (): SourceSetupOpenRouter => ({
     oaiHost: 'https://openrouter.ai/api',
     oaiKey: '',
+    defaultCheck: true
   }),
-  getTransportAccess: (partialSetup): OpenAIAccessSchema => ({
+  getTransportAccess: (partialSetup: OpenAIAccessSchema): OpenAIAccessSchema => ({
     dialect: 'openrouter',
     oaiKey: partialSetup?.oaiKey || '',
     oaiOrg: '',
     oaiHost: partialSetup?.oaiHost || '',
     heliKey: '',
     moderationCheck: false,
-    defaultCheck: false,
+    defaultCheck: partialSetup?.defaultCheck,
   }),
 
   // there is delay for OpenRouter Free API calls
