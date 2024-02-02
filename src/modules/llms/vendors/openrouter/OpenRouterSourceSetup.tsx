@@ -7,11 +7,11 @@ import { InlineError } from '~/common/components/InlineError';
 import { Link } from '~/common/components/Link';
 import { SetupFormRefetchButton } from '~/common/components/forms/SetupFormRefetchButton';
 import { getCallbackUrl } from '~/common/app.routes';
-import { FormSwitchControl } from '~/common/components/forms/FormSwitchControl';
 
 import { DModelSourceId } from '../../store-llms';
 import { useLlmUpdateModels } from '../useLlmUpdateModels';
 import { useSourceSetup } from '../useSourceSetup';
+import { FormSwitchControl } from '~/common/components/forms/FormSwitchControl';
 
 import { isValidOpenRouterKey, ModelVendorOpenRouter } from './openrouter.vendor';
 
@@ -43,7 +43,9 @@ export function OpenRouterSourceSetup(props: { sourceId: DModelSourceId }) {
     // ...bye / see you soon at the callback location...
   };
 
+
   return <>
+
     <Typography level='body-sm'>
       <Link href='https://openrouter.ai/keys' target='_blank'>OpenRouter</Link> is an independent service
       granting access to <Link href='https://openrouter.ai/docs#models' target='_blank'>exclusive models</Link> such
@@ -81,7 +83,7 @@ export function OpenRouterSourceSetup(props: { sourceId: DModelSourceId }) {
     </>}
 
     <SetupFormRefetchButton
-      refetch={refetch} disabled={!shallFetchSucceed || isFetching} loading={isFetching} error={isError} defaultCheck={defaultCheck}
+      refetch={refetch} disabled={!shallFetchSucceed || isFetching} loading={isFetching} error={isError}
       leftButton={!defaultCheck &&
         <Button
           color='neutral' variant={(needsUserKey && !keyValid) ? 'solid' : 'outlined'}

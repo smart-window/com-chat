@@ -56,7 +56,7 @@ export const ModelVendorOpenAI: IModelVendor<SourceSetupOpenAI, OpenAIAccessSche
     oaiHost: '',
     heliKey: '',
     moderationCheck: false,
-    defaultCheck: true,
+    defaultCheck: false,
     ...partialSetup,
   }),
 

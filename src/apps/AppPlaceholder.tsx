@@ -3,11 +3,13 @@ import * as React from 'react';
 import { Box, Typography } from '@mui/joy';
 
 import { capitalizeFirstLetter } from '~/common/util/textUtils';
-import { themeBgApp } from '~/common/app.theme';
 import { useRouterRoute } from '~/common/app.routes';
 
 
-export function AppPlaceholder() {
+/**
+ * https://github.com/smart-window/com-chat/issues/299
+ */
+export function AppPlaceholder(props: { text?: string }) {
 
   // external state
   const route = useRouterRoute();
@@ -18,7 +20,6 @@ export function AppPlaceholder() {
   return (
     <Box sx={{
       flexGrow: 1,
-      backgroundColor: themeBgApp,
       overflowY: 'auto',
       p: { xs: 3, md: 6 },
       border: '1px solid blue',
@@ -35,7 +36,7 @@ export function AppPlaceholder() {
           {placeholderAppName}
         </Typography>
         <Typography>
-          Intelligent applications to help you learn, think, and do
+          {props.text || 'Intelligent applications to help you learn, think, and do'}
         </Typography>
 
       </Box>

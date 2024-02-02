@@ -68,6 +68,7 @@ export const env = createEnv({
     throw new Error('Invalid environment variable');
   },
 
+  // matches user expectations - see https://github.com/smart-window/com-chat/issues/279
   emptyStringAsUndefined: true,
 
   // with Noext.JS >= 13.4.4 we'd only need to destructure client variables
