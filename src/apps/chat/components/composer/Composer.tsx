@@ -3,7 +3,7 @@ import { shallow } from 'zustand/shallow';
 import { fileOpen, FileWithHandle } from 'browser-fs-access';
 import { keyframes } from '@emotion/react';
 
-import { Box, Button, ButtonGroup, Card, Dropdown, Grid, IconButton, Menu, MenuButton, MenuItem, Stack, Textarea, Tooltip, Typography } from '@mui/joy';
+import { Box, Button, ButtonGroup, Card, Dropdown, Grid, IconButton, Menu, MenuButton, MenuItem, Textarea, Tooltip, Typography } from '@mui/joy';
 import { ColorPaletteProp, SxProps, VariantProp } from '@mui/joy/styles/types';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
@@ -31,10 +31,10 @@ import { launchAppCall } from '~/common/app.routes';
 import { lineHeightTextarea } from '~/common/app.theme';
 import { playSoundUrl } from '~/common/util/audioUtils';
 import { supportsClipboardRead } from '~/common/util/clipboardUtils';
+import { supportsScreenCapture } from '~/common/util/screenCaptureUtils';
 import { useDebouncer } from '~/common/components/useDebouncer';
 import { useGlobalShortcut } from '~/common/components/useGlobalShortcut';
-import { useIsMobile } from '~/common/components/useMatchMedia';
-import { useUIPreferencesStore } from '~/common/state/store-ui';
+import { useUICounter, useUIPreferencesStore } from '~/common/state/store-ui';
 import { useUXLabsStore } from '~/common/state/store-ux-labs';
 
 import type { ActileItem, ActileProvider } from './actile/ActileProvider';
@@ -50,9 +50,11 @@ import type { ComposerOutputMultiPart } from './composer.types';
 import { ButtonAttachCameraMemo, useCameraCaptureModal } from './buttons/ButtonAttachCamera';
 import { ButtonAttachClipboardMemo } from './buttons/ButtonAttachClipboard';
 import { ButtonAttachFileMemo } from './buttons/ButtonAttachFile';
+import { ButtonAttachScreenCaptureMemo } from './buttons/ButtonAttachScreenCapture';
 import { ButtonCall } from './buttons/ButtonCall';
 import { ButtonMicContinuationMemo } from './buttons/ButtonMicContinuation';
 import { ButtonMicMemo } from './buttons/ButtonMic';
+import { ButtonMultiChat } from './buttons/ButtonMultiChat';
 import { ButtonOptionsDraw } from './buttons/ButtonOptionsDraw';
 import { ChatModeMenu } from './ChatModeMenu';
 import { TokenBadgeMemo } from './TokenBadge';
@@ -76,13 +78,16 @@ export const animationStopEnter = keyframes`
  * A React component for composing messages, with attachments and different modes.
  */
 export function Composer(props: {
+  isMobile?: boolean;
   chatLLM: DLLM | null;
   composerTextAreaRef: React.RefObject<HTMLTextAreaElement>;
   conversationId: DConversationId | null;
   capabilityHasT2I: boolean;
+  isMulticast: boolean | null;
   isDeveloperMode: boolean;
   onAction: (chatModeId: ChatModeId, conversationId: DConversationId, multiPartMessage: ComposerOutputMultiPart) => boolean;
   onTextImagine: (conversationId: DConversationId, text: string) => void;
+  setIsMulticast: (on: boolean) => void;
   sx?: SxProps;
 }) {
 
@@ -94,11 +99,12 @@ export function Composer(props: {
   const [chatModeMenuAnchor, setChatModeMenuAnchor] = React.useState<HTMLAnchorElement | null>(null);
 
   // external state
-  const isMobile = useIsMobile();
   const { openPreferencesTab /*, setIsFocusedMode*/ } = useOptimaLayout();
-  const { labsCameraDesktop } = useUXLabsStore(state => ({
+  const { labsAttachScreenCapture, labsCameraDesktop } = useUXLabsStore(state => ({
+    labsAttachScreenCapture: state.labsAttachScreenCapture,
     labsCameraDesktop: state.labsCameraDesktop,
   }), shallow);
+  const { novel: explainShiftEnter, touch: touchShiftEnter } = useUICounter('composer-shift-enter');
   const [chatModeId, setChatModeId] = React.useState<ChatModeId>('generate-text');
   const [startupText, setStartupText] = useComposerStartupText();
   const enterIsNewline = useUIPreferencesStore(state => state.enterIsNewline);
@@ -116,9 +122,11 @@ export function Composer(props: {
   const { attachAppendClipboardItems, attachAppendDataTransfer, attachAppendFile, attachments: _attachments, clearAttachments, removeAttachment } =
     useAttachments(browsingInComposer && !composeText.startsWith('/'));
 
+
   // derived state
 
-  const isDesktop = !isMobile;
+  const isMobile = !!props.isMobile;
+  const isDesktop = !props.isMobile;
   const chatLLMId = props.chatLLM?.id || null;
 
   // attachments derived state
@@ -256,6 +264,8 @@ export function Composer(props: {
       }
 
       // Shift: toggles the 'enter is newline'
+      if (e.shiftKey)
+        touchShiftEnter();
       if (enterIsNewline ? e.shiftKey : !e.shiftKey) {
         if (!assistantAbortible)
           handleSendAction(chatModeId, composeText);
@@ -263,7 +273,7 @@ export function Composer(props: {
       }
     }
 
-  }, [actileInterceptKeydown, assistantAbortible, chatModeId, composeText, enterIsNewline, handleSendAction]);
+  }, [actileInterceptKeydown, assistantAbortible, chatModeId, composeText, enterIsNewline, handleSendAction, touchShiftEnter]);
 
 
   // Focus mode
@@ -339,6 +349,10 @@ export function Composer(props: {
 
   const handleAttachCameraImage = React.useCallback((file: FileWithHandle) => {
     void attachAppendFile('camera', file);
+  }, [attachAppendFile]);
+
+  const handleAttachScreenCapture = React.useCallback((file: File) => {
+    void attachAppendFile('screencapture', file);
   }, [attachAppendFile]);
 
   const { openCamera, cameraCaptureComponent } = useCameraCaptureModal(handleAttachCameraImage);
@@ -429,32 +443,36 @@ export function Composer(props: {
     ? 'warning'
     : isReAct ? 'success' : isDraw ? 'warning' : 'primary';
 
-  const textPlaceholder: string =
+  let textPlaceholder: string =
     isDraw
       ? 'Describe an idea or a drawing...'
       : isReAct
         ? 'Multi-step reasoning question...'
         : props.isDeveloperMode
-          ? 'Chat with me · drop source files · attach code...'
+          ? 'Chat with me' + (isDesktop ? ' · drop source' : '') + ' · attach code...'
           : props.capabilityHasT2I
             ? 'Chat · /react · /draw · drop files...'
             : 'Chat · /react · drop files...';
-
+  if (isDesktop && explainShiftEnter)
+    textPlaceholder += !enterIsNewline ? '\nShift+Enter to add a new line' : '\nShift+Enter to send';
 
   return (
     <Box aria-label='User Message' component='section' sx={props.sx}>
       <Grid container spacing={{ xs: 1, md: 2 }}>
 
-        {/* Button column and composer Text (mobile: top, desktop: left and center) */}
-        <Grid xs={12} md={9}><Stack direction='row' spacing={{ xs: 1, md: 2 }}>
+        <Grid xs={12} md={9}><Box sx={{ display: 'flex', gap: { xs: 1, md: 2 }, alignItems: 'flex-start' }}>
 
-          {/* Vertical (insert) buttons */}
-          {isMobile ? (
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+          {/* Start buttons column */}
+          <Box sx={{
+            flexGrow: 0,
+            display: 'grid', gap: 1,
+          }}>
+            {isMobile ? <>
 
               {/* [mobile] Mic button */}
               {isSpeechEnabled && <ButtonMicMemo variant={micVariant} color={micColor} onClick={handleToggleMic} />}
 
+              {/* [mobile] [+] button */}
               <Dropdown>
                 <MenuButton slots={{ root: IconButton }}>
                   <AddCircleOutlineIcon />
@@ -477,9 +495,10 @@ export function Composer(props: {
                 </Menu>
               </Dropdown>
 
-            </Box>
-          ) : (
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              {/* [Mobile] MultiChat button */}
+              {props.isMulticast !== null && <ButtonMultiChat isMobile multiChat={props.isMulticast} onSetMultiChat={props.setIsMulticast} />}
+
+            </> : <>
 
               {/*<FormHelperText sx={{ mx: 'auto' }}>*/}
               {/*  Attach*/}
@@ -491,20 +510,24 @@ export function Composer(props: {
               {/* Responsive Paste button */}
               {supportsClipboardRead && <ButtonAttachClipboardMemo onClick={attachAppendClipboardItems} />}
 
+              {/* Responsive Screen Capture button */}
+              {labsAttachScreenCapture && supportsScreenCapture && <ButtonAttachScreenCaptureMemo onAttachScreenCapture={handleAttachScreenCapture} />}
+
               {/* Responsive Camera OCR button */}
               {labsCameraDesktop && <ButtonAttachCameraMemo onOpenCamera={openCamera} />}
 
-            </Box>
-          )}
+            </>}
+          </Box>
 
-          {/* Vertically stacked [ Edit box + Overlays + Mic | Attachments ] */}
+          {/* [ Textarea + Overlays + Mic | Attachments ] */}
           <Box sx={{
             flexGrow: 1,
+            // layout
             display: 'flex', flexDirection: 'column', gap: 1,
-            minWidth: 200, // enable X-scrolling (resetting any possible minWidth due to the attachments)
+            minWidth: 200, // flex: enable X-scrolling (resetting any possible minWidth due to the attachments)
           }}>
 
-            {/* Edit box + Overlays + Mic buttons */}
+            {/* Textarea + Mic buttons + Mic/Drag overlay */}
             <Box sx={{ position: 'relative' }}>
 
               {/* Edit box with inner Token Progress bar */}
@@ -628,13 +651,13 @@ export function Composer(props: {
 
           </Box>
 
-        </Stack></Grid>
+        </Box></Grid>
 
-        {/* Send pane (mobile: bottom, desktop: right) */}
+
         <Grid xs={12} md={3}>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, height: '100%' }}>
 
-            {/* Send/Stop (and mobile corner buttons) */}
+            {/* This row is here only for the [mobile] bottom-start corner item */}
             <Box sx={{ display: 'flex' }}>
 
               {/* [mobile] bottom-corner secondary button */}
@@ -701,9 +724,11 @@ export function Composer(props: {
 
             </Box>
 
+            {/* [desktop] Multicast switch (under the Chat button) */}
+            {isDesktop && props.isMulticast !== null && <ButtonMultiChat multiChat={props.isMulticast} onSetMultiChat={props.setIsMulticast} />}
 
             {/* [desktop] secondary buttons (aligned to bottom for now, and mutually exclusive) */}
-            {isDesktop && <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', gap: 1, justifyContent: 'flex-end' }}>
+            {isDesktop && <Box sx={{ mt: 'auto', display: 'grid', gap: 1 }}>
 
               {/* [desktop] Call secondary button */}
               {isChat && <ButtonCall disabled={!props.conversationId || !chatLLMId} onClick={handleCallClicked} />}
@@ -716,23 +741,23 @@ export function Composer(props: {
           </Box>
         </Grid>
 
-
-        {/* Mode selector */}
-        {!!chatModeMenuAnchor && (
-          <ChatModeMenu
-            anchorEl={chatModeMenuAnchor} onClose={handleModeSelectorHide}
-            chatModeId={chatModeId} onSetChatModeId={handleModeChange}
-            capabilityHasTTI={props.capabilityHasT2I}
-          />
-        )}
-
-        {/* Camera */}
-        {cameraCaptureComponent}
-
-        {/* Actile */}
-        {actileComponent}
-
       </Grid>
+
+      {/* Mode selector */}
+      {!!chatModeMenuAnchor && (
+        <ChatModeMenu
+          anchorEl={chatModeMenuAnchor} onClose={handleModeSelectorHide}
+          chatModeId={chatModeId} onSetChatModeId={handleModeChange}
+          capabilityHasTTI={props.capabilityHasT2I}
+        />
+      )}
+
+      {/* Camera */}
+      {cameraCaptureComponent}
+
+      {/* Actile */}
+      {actileComponent}
+
     </Box>
   );
 }

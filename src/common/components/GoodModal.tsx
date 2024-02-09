@@ -22,13 +22,17 @@ export function GoodModal(props: {
 }) {
   const showBottomClose = !!props.onClose && props.hideBottomClose !== true;
   return (
-    <Modal open={props.open} onClose={props.onClose}>
+    <Modal
+      open={props.open}
+      onClose={props.onClose}
+      // slotProps={{ backdrop: { sx: { backdropFilter: 'blur(6px)' } } }}
+    >
       <ModalOverflow sx={{ p: 1 }}>
         <ModalDialog
           sx={{
             minWidth: { xs: 360, sm: 500, md: 600, lg: 700 },
             maxWidth: 700,
-            display: 'flex', flexDirection: 'column', gap: 'var(--Card-padding)',
+            display: 'grid', gap: 'var(--Card-padding)',
             ...props.sx,
           }}>
 
@@ -41,7 +45,9 @@ export function GoodModal(props: {
 
           {props.dividers === true && <Divider />}
 
+          {/*<Box sx={{ maxHeight: '80lvh', overflowY: 'auto', display: 'grid', gap: 'var(--Card-padding)' }}>*/}
           {props.children}
+          {/*</Box>*/}
 
           {props.dividers === true && <Divider />}
 

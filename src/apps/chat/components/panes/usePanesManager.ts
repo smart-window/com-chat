@@ -27,13 +27,13 @@ interface AppChatPanesStore {
   // state
   chatPanes: ChatPane[];
   chatPaneFocusIndex: number | null;
-  chatPaneInputMode: 'focused' | 'broadcast';
 
   // actions
   openConversationInFocusedPane: (conversationId: DConversationId) => void;
   openConversationInSplitPane: (conversationId: DConversationId) => void;
   navigateHistoryInFocusedPane: (direction: 'back' | 'forward') => boolean;
-  duplicatePane: (paneIndex: number) => void;
+  duplicateFocusedPane: (/*paneIndex: number*/) => void;
+  removeOtherPanes: () => void;
   removePane: (paneIndex: number) => void;
   setFocusedPane: (paneIndex: number) => void;
   onConversationsChanged: (conversationIds: DConversationId[]) => void;
@@ -54,7 +54,6 @@ const useAppChatPanesStore = create<AppChatPanesStore>()(persist(
     // Initial state: no panes
     chatPanes: [] as ChatPane[],
     chatPaneFocusIndex: null as number | null,
-    chatPaneInputMode: 'focused' as 'focused' | 'broadcast',
 
     openConversationInFocusedPane: (conversationId: DConversationId) => {
       _set((state) => {
@@ -160,18 +159,18 @@ const useAppChatPanesStore = create<AppChatPanesStore>()(persist(
       return true;
     },
 
-    duplicatePane: (paneIndex: number) =>
+    duplicateFocusedPane: (/*paneIndex: number*/) =>
       _set(state => {
-        const { chatPanes } = state;
+        const { chatPanes, chatPaneFocusIndex: _srcIndex } = state;
 
         // Validate index
-        if (paneIndex < 0 || paneIndex >= chatPanes.length) {
-          console.warn('Attempted to duplicate a pane with an out-of-range index:', paneIndex);
+        if (_srcIndex === null || _srcIndex < 0 || _srcIndex >= chatPanes.length) {
+          console.warn('Attempted to duplicate a pane with an out-of-range index:', _srcIndex);
           return state; // Return the existing state without changes
         }
 
         // Clone the pane at the specified index, including a deep copy of the history array
-        const paneToDuplicate = chatPanes[paneIndex];
+        const paneToDuplicate = chatPanes[_srcIndex];
         const duplicatedPane = {
           ...paneToDuplicate,
           history: [...paneToDuplicate.history], // Deep copy of the history array
@@ -179,14 +178,27 @@ const useAppChatPanesStore = create<AppChatPanesStore>()(persist(
 
         // Insert the duplicated pane into the array, right after the original pane
         const newPanes = [
-          ...chatPanes.slice(0, paneIndex + 1),
+          ...chatPanes.slice(0, _srcIndex + 1),
           duplicatedPane,
-          ...chatPanes.slice(paneIndex + 1),
+          ...chatPanes.slice(_srcIndex + 1),
         ];
 
         return {
           chatPanes: newPanes,
-          chatPaneFocusIndex: paneIndex + 1,
+          chatPaneFocusIndex: _srcIndex + 1,
+        };
+      }),
+
+    removeOtherPanes: () =>
+      _set(state => {
+        const { chatPanes, chatPaneFocusIndex } = state;
+        if (chatPanes.length < 2)
+          return state;
+
+        const newPanes = [chatPanes[chatPaneFocusIndex ?? 0]];
+        return {
+          chatPanes: newPanes,
+          chatPaneFocusIndex: 0,
         };
       }),
 
@@ -267,7 +279,7 @@ const useAppChatPanesStore = create<AppChatPanesStore>()(persist(
         // play it safe, and make sure a pane exists, and is focused
         return {
           chatPanes: newPanes.length ? newPanes : [createPane(conversationIds[0] ?? null)],
-          chatPaneFocusIndex: (newPanes.length && chatPaneFocusIndex !== null && chatPaneFocusIndex < newPanes.length) ? state.chatPaneFocusIndex : 0,
+          chatPaneFocusIndex: (newPanes.length && chatPaneFocusIndex !== null && chatPaneFocusIndex < newPanes.length) ? chatPaneFocusIndex : 0,
         };
       }),
 
@@ -287,7 +299,6 @@ export function usePanesManager() {
       onConversationsChanged,
       openConversationInFocusedPane,
       openConversationInSplitPane,
-      duplicatePane,
       removePane,
       setFocusedPane,
     } = state;
@@ -299,8 +310,7 @@ export function usePanesManager() {
       onConversationsChanged,
       openConversationInFocusedPane,
       openConversationInSplitPane,
-      paneIndex: chatPaneFocusIndex,
-      duplicatePane,
+      focusedPaneIndex: chatPaneFocusIndex,
       removePane,
       setFocusedPane,
     };
@@ -319,4 +329,13 @@ export function usePanesManager() {
   return {
     ...panesFunctions,
   };
+}
+
+export function usePaneDuplicateOrClose() {
+  return useAppChatPanesStore(state => ({
+    canAddPane: state.chatPanes.length < 4,
+    isMultiPane: state.chatPanes.length > 1,
+    duplicateFocusedPane: state.duplicateFocusedPane,
+    removeOtherPanes: state.removeOtherPanes,
+  }), shallow);
 }

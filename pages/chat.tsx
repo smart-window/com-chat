@@ -6,7 +6,7 @@ import { useRedirectToNewsOnUpdates } from '../src/apps/news/news.hooks';
 import { withLayout } from '~/common/layout/withLayout';
 
 
-export default function ChatPage() {
+export default function IndexPage() {
   // show the News page if there are unseen updates
   useRedirectToNewsOnUpdates();
 

@@ -1,5 +1,7 @@
-import { DLLMId } from '~/modules/llms/store-llms';
+import { DLLMId, getKnowledgeMapCutoff } from '~/modules/llms/store-llms';
 import { SystemPurposeId, SystemPurposes } from '../../../data';
+
+import { bareBonesPromptMixer } from '~/modules/persona/pmix/pmix';
 
 import { createDMessage, DMessage, useChatStore } from '~/common/state/store-chats';
 
@@ -19,9 +21,7 @@ export function updatePurposeInHistory(conversationId: string, history: DMessage
   const systemMessage: DMessage = systemMessageIndex >= 0 ? history.splice(systemMessageIndex, 1)[0] : createDMessage('system', '');
   if (!systemMessage.updated && purposeId && SystemPurposes[purposeId]?.systemMessage) {
     systemMessage.purposeId = purposeId;
-    systemMessage.text = SystemPurposes[purposeId].systemMessage
-      .replaceAll('{{Cutoff}}', assistantLlmId.includes('1106') ? '2023-04' : '2021-09')
-      .replaceAll('{{Today}}', new Date().toISOString().split('T')[0]);
+    systemMessage.text = bareBonesPromptMixer(SystemPurposes[purposeId].systemMessage, assistantLlmId);
 
     // HACK: this is a special case for the "Custom" persona, to set the message in stone (so it doesn't get updated when switching to another persona)
     if (purposeId === 'Custom')

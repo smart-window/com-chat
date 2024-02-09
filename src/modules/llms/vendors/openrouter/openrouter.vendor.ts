@@ -1,6 +1,6 @@
 import { backendCaps } from '~/modules/backend/state-backend';
 
-import { OpenRouterIcon } from '~/common/components/icons/OpenRouterIcon';
+import { OpenRouterIcon } from '~/common/components/icons/vendors/OpenRouterIcon';
 
 import type { IModelVendor } from '../IModelVendor';
 import type { OpenAIAccessSchema } from '../../server/openai/openai.router';
@@ -51,7 +51,7 @@ export const ModelVendorOpenRouter: IModelVendor<SourceSetupOpenRouter, OpenAIAc
     oaiHost: 'https://openrouter.ai/api',
     oaiKey: '',
     defaultCheck: true
-  }),
+}),
   getTransportAccess: (partialSetup: OpenAIAccessSchema): OpenAIAccessSchema => ({
     dialect: 'openrouter',
     oaiKey: partialSetup?.oaiKey || '',

@@ -7,9 +7,10 @@ import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import MenuIcon from '@mui/icons-material/Menu';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
+import SettingsIcon from '@mui/icons-material/Settings';
 
 import { checkVisibleNav, NavItemApp } from '~/common/app.nav';
+import { AgiSquircleIcon } from '~/common/components/icons/AgiSquircleIcon';
 import { Brand } from '~/common/app.config';
 import { CloseableMenu } from '~/common/components/CloseableMenu';
 import { Link } from '~/common/components/Link';
@@ -33,7 +34,7 @@ const PageBarItemsFallback = (props: { currentApp?: NavItemApp }) =>
   </Box>;
 
 
-function CommonMenuItems(props: { onClose: () => void }) {
+function CommonPageMenuItems(props: { onClose: () => void }) {
 
   // external state
   const { openPreferencesTab } = useOptimaLayout();
@@ -61,12 +62,13 @@ function CommonMenuItems(props: { onClose: () => void }) {
     {/* Preferences |...| Dark Mode Toggle */}
     {/*<Tooltip title={<KeyStroke combo='Ctrl + Shift + P' />}>*/}
     <MenuItem onClick={handleShowSettings}>
-      <ListItemDecorator><SettingsOutlinedIcon /></ListItemDecorator>
+      <ListItemDecorator><SettingsIcon /></ListItemDecorator>
       Preferences
       <IconButton
-        variant='outlined'
+        size='sm'
+        variant='soft'
         onClick={handleToggleDarkMode}
-        sx={{ ml: 'auto' }}
+        sx={{ ml: 'auto', /*mr: '2px',*/ my: '-0.25rem' /* absorb the menuItem padding */ }}
       >
         {colorMode !== 'dark' ? <DarkModeIcon /> : <LightModeIcon />}
       </IconButton>
@@ -98,8 +100,8 @@ export function PageBar(props: { component: React.ElementType, currentApp?: NavI
     isPageMenuOpen, openPageMenu, closePageMenu,
   } = useOptimaDrawers();
 
-  const commonMenuItems = React.useMemo(() => {
-    return <CommonMenuItems onClose={closePageMenu} />;
+  const commonPageMenuItems = React.useMemo(() => {
+    return <CommonPageMenuItems onClose={closePageMenu} />;
   }, [closePageMenu]);
 
   // [Desktop] hide the app bar if the current app doesn't use it
@@ -146,6 +148,7 @@ export function PageBar(props: { component: React.ElementType, currentApp?: NavI
         minHeight: 'var(--Bar)',
         display: 'flex', flexFlow: 'row wrap', justifyContent: 'center', alignItems: 'center',
         my: 'auto',
+        gap: props.isMobile ? 0 : 1,
       }}>
         {appBarItems
           ? appBarItems
@@ -167,16 +170,16 @@ export function PageBar(props: { component: React.ElementType, currentApp?: NavI
 
     {/* Page Menu */}
     <CloseableMenu
-      maxHeightGapPx={56 + 24} noBottomPadding noTopPadding sx={{ minWidth: 320 }}
+      dense maxHeightGapPx={56 + 24} noBottomPadding={props.isMobile} placement='bottom-end'
       open={isPageMenuOpen && !!pageMenuAnchor.current} anchorEl={pageMenuAnchor.current} onClose={closePageMenu}
-      placement='bottom-end'
+      sx={{ minWidth: 280 }}
     >
 
       {/* Common (Preferences) */}
-      {commonMenuItems}
+      {commonPageMenuItems}
 
       {/* App Menu Items */}
-      {!!appMenuItems && <ListDivider sx={{ mt: 0 }} />}
+      {!!appMenuItems && <ListDivider />}
       {!!appMenuItems && <Box sx={{ overflowY: 'auto' }}>{appMenuItems}</Box>}
 
       {/* [Mobile] Nav is implemented at the bottom of the Page Menu (for now) */}

@@ -11,8 +11,8 @@ import { Brand } from '~/common/app.config';
 import { fixupHost } from '~/common/util/urlUtils';
 
 import { OpenAIWire, WireOpenAICreateImageOutput, wireOpenAICreateImageOutputSchema, WireOpenAICreateImageRequest } from './openai.wiretypes';
+import { azureModelToModelDescription, lmStudioModelToModelDescription, localAIModelToModelDescription, mistralModelsSort, mistralModelToModelDescription, oobaboogaModelToModelDescription, openAIModelToModelDescription, openRouterModelFamilySortFn, openRouterModelToModelDescription, togetherAIModelsToModelDescriptions } from './models.data';
 import { llmsChatGenerateWithFunctionsOutputSchema, llmsListModelsOutputSchema, ModelDescriptionSchema } from '../llm.server.types';
-import { lmStudioModelToModelDescription, localAIModelToModelDescription, mistralModelsSort, mistralModelToModelDescription, oobaboogaModelToModelDescription, openAIModelToModelDescription, openRouterModelFamilySortFn, openRouterModelToModelDescription, togetherAIModelsToModelDescriptions } from './models.data';
 
 
 const openAIDialects = z.enum([
@@ -123,7 +123,7 @@ export const llmOpenAIRouter = createTRPCRouter({
           .filter(m => m.model.includes('gpt'))
           .map((model): ModelDescriptionSchema => {
             const { id: deploymentRef, model: openAIModelId } = model;
-            const { id: _deleted, label, ...rest } = openAIModelToModelDescription(openAIModelId, model.created_at, model.updated_at);
+            const { id: _deleted, label, ...rest } = azureModelToModelDescription(deploymentRef, openAIModelId, model.created_at, model.updated_at);
             return {
               id: deploymentRef,
               label: `${label} (${deploymentRef})`,
@@ -191,8 +191,18 @@ export const llmOpenAIRouter = createTRPCRouter({
 
             // custom OpenAI sort
             .sort((a, b) => {
-              // due to model name, sorting doesn't require special cases anymore
-              return b.label.localeCompare(a.label);
+
+              // fix the OpenAI model names to be chronologically sorted
+              function remapReleaseDate(id: string): string {
+                return id
+                  .replace('0314', '230314')
+                  .replace('0613', '230613')
+                  .replace('1106', '231106')
+                  .replace('0125', '240125');
+              }
+
+              // due to using by-label, sorting doesn't require special cases anymore
+              return remapReleaseDate(b.label).localeCompare(remapReleaseDate(a.label));
 
               // move models with the link emoji (🔗) to the bottom
               // const aLink = a.label.includes('🔗');
@@ -363,7 +373,7 @@ export function openAIAccess(access: OpenAIAccessSchema, modelRefId: string | nu
       let oaiHost = fixupHost(access.oaiHost || env.OPENAI_API_HOST || DEFAULT_OPENAI_HOST, apiPath);
       // warn if no key - only for default (non-overridden) hosts
       if (!oaiKey && oaiHost.indexOf(DEFAULT_OPENAI_HOST) !== -1)
-        throw new Error('Missing OpenAI API Key. Add it on the UI (Models Setup) or use default system api key.');
+        throw new Error('Missing OpenAI API Key. Add it on the UI (Models Setup) or server side (your deployment).');
 
       // [Helicone]
       // We don't change the host (as we do on Anthropic's), as we expect the user to have a custom host.
@@ -427,7 +437,7 @@ export function openAIAccess(access: OpenAIAccessSchema, modelRefId: string | nu
       const orKey = access.defaultCheck ? (env.OPENROUTER_API_KEY || '') : (access.oaiKey || '');
       const orHost = fixupHost(access.oaiHost || DEFAULT_OPENROUTER_HOST, apiPath);
       if (!orKey || !orHost)
-        throw new Error('Missing OpenRouter API Key or Host. Add it on the UI (Models Setup) or use default system api key.');
+        throw new Error('Missing OpenRouter API Key or Host. Add it on the UI (Models Setup) or server side (your deployment).');
 
       return {
         headers: {

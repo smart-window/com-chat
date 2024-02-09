@@ -1,10 +1,7 @@
 import * as React from 'react';
-import TimeAgo from 'react-timeago';
 import { shallow } from 'zustand/shallow';
-import { cleanupEfficiency, Diff as TextDiff, makeDiff } from '@sanity/diff-match-patch';
 
-import { Avatar, Box, Button, CircularProgress, IconButton, ListDivider, ListItem, ListItemDecorator, MenuItem, Switch, Tooltip, Typography } from '@mui/joy';
-import { SxProps } from '@mui/joy/styles/types';
+import { Avatar, Box, CircularProgress, IconButton, ListDivider, ListItem, ListItemDecorator, MenuItem, Switch, Tooltip, Typography } from '@mui/joy';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import ClearIcon from '@mui/icons-material/Clear';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
@@ -23,30 +20,19 @@ import VerticalAlignBottomIcon from '@mui/icons-material/VerticalAlignBottom';
 
 import { CloseableMenu } from '~/common/components/CloseableMenu';
 import { DMessage } from '~/common/state/store-chats';
-import { InlineError } from '~/common/components/InlineError';
 import { InlineTextarea } from '~/common/components/InlineTextarea';
 import { KeyStroke } from '~/common/components/KeyStroke';
 import { Link } from '~/common/components/Link';
 import { SystemPurposeId, SystemPurposes } from '../../../../data';
 import { copyToClipboard } from '~/common/util/clipboardUtils';
-import { cssRainbowColorKeyframes, lineHeightChatText } from '~/common/app.theme';
+import { cssRainbowColorKeyframes } from '~/common/app.theme';
 import { prettyBaseModel } from '~/common/util/modelUtils';
 import { useUIPreferencesStore } from '~/common/state/store-ui';
 
+import { BlocksRenderer, editBlocksSx } from './blocks/BlocksRenderer';
 import { useChatShowTextDiff } from '../../store-app-chat';
+import { useSanityTextDiffs } from './blocks/RenderTextDiff';
 
-import { RenderCode } from './RenderCode';
-import { RenderHtml } from './RenderHtml';
-import { RenderImage } from './RenderImage';
-import { RenderLatex } from './RenderLatex';
-import { RenderMarkdown } from './RenderMarkdown';
-import { RenderText } from './RenderText';
-import { RenderTextDiff } from './RenderTextDiff';
-import { parseBlocks } from './blocks';
-
-
-// How long is the user collapsed message
-const USER_COLLAPSED_LINES: number = 8;
 
 // Enable the menu on text selection
 const ENABLE_SELECTION_RIGHT_CLICK_MENU: boolean = true;
@@ -180,21 +166,6 @@ function explainErrorInMessage(text: string, isAssistant: boolean, modelId?: str
   return { errorMessage, isAssistantError };
 }
 
-function useSanityTextDiffs(text: string, diffText: string | undefined, enabled: boolean) {
-  const [diffs, setDiffs] = React.useState<TextDiff[] | null>(null);
-  React.useEffect(() => {
-    if (!diffText || !enabled)
-      return setDiffs(null);
-    setDiffs(
-      cleanupEfficiency(makeDiff(diffText, text, {
-        timeout: 1,
-        checkLines: true,
-      }), 4),
-    );
-  }, [text, diffText, enabled]);
-  return diffs;
-}
-
 
 export const ChatMessageMemo = React.memo(ChatMessage);
 
@@ -206,13 +177,14 @@ export const ChatMessageMemo = React.memo(ChatMessage);
  * or collapsing long user messages.
  *
  */
-export function ChatMessage(props: {
+function ChatMessage(props: {
   message: DMessage,
-  showDate?: boolean, diffPreviousText?: string,
-  hideAvatars?: boolean, codeBackground?: string,
-  noMarkdown?: boolean, diagramMode?: boolean,
-  isBottom?: boolean, noBottomBorder?: boolean,
-  isImagining?: boolean, isSpeaking?: boolean,
+  diffPreviousText?: string,
+  isBottom?: boolean,
+  isMobile?: boolean,
+  isImagining?: boolean,
+  isSpeaking?: boolean,
+  blocksShowDate?: boolean,
   onConversationBranch?: (messageId: string) => void,
   onConversationRestartFrom?: (messageId: string, offset: number) => Promise<void>,
   onConversationTruncate?: (messageId: string) => void,
@@ -221,11 +193,9 @@ export function ChatMessage(props: {
   onTextDiagram?: (messageId: string, text: string) => Promise<void>
   onTextImagine?: (text: string) => Promise<void>
   onTextSpeak?: (text: string) => Promise<void>
-  sx?: SxProps,
 }) {
 
   // state
-  const [forceUserExpanded, setForceUserExpanded] = React.useState(false);
   const [isHovering, setIsHovering] = React.useState(false);
   const [opsMenuAnchor, setOpsMenuAnchor] = React.useState<HTMLElement | null>(null);
   const [selMenuAnchor, setSelMenuAnchor] = React.useState<HTMLElement | null>(null);
@@ -233,10 +203,11 @@ export function ChatMessage(props: {
   const [isEditing, setIsEditing] = React.useState(false);
 
   // external state
-  const { cleanerLooks, renderMarkdown, doubleClickToEdit } = useUIPreferencesStore(state => ({
+  const { cleanerLooks, doubleClickToEdit, messageTextSize, renderMarkdown } = useUIPreferencesStore(state => ({
     cleanerLooks: state.zenMode === 'cleaner',
-    renderMarkdown: state.renderMarkdown,
     doubleClickToEdit: state.doubleClickToEdit,
+    messageTextSize: state.messageTextSize,
+    renderMarkdown: state.renderMarkdown,
   }), shallow);
   const [showDiff, setShowDiff] = useChatShowTextDiff();
   const textDiffs = useSanityTextDiffs(props.message.text, props.diffPreviousText, showDiff);
@@ -257,10 +228,9 @@ export function ChatMessage(props: {
 
   const fromAssistant = messageRole === 'assistant';
   const fromSystem = messageRole === 'system';
-  const fromUser = messageRole === 'user';
   const wasEdited = !!messageUpdated;
 
-  const showAvatars = props.hideAvatars !== true && !cleanerLooks;
+  const showAvatars = !cleanerLooks;
 
   const textSel = selMenuText ? selMenuText : messageText;
   const isSpecialT2I = textSel.startsWith('https://images.prodia.xyz/') || textSel.startsWith('/draw ') || textSel.startsWith('/imagine ') || textSel.startsWith('/img ');
@@ -275,36 +245,35 @@ export function ChatMessage(props: {
       props.onMessageEdit(messageId, editedText);
   };
 
-  const handleUncollapse = () => setForceUserExpanded(true);
-
 
   // Operations Menu
 
-  const closeOperationsMenu = () => setOpsMenuAnchor(null);
+  const closeOpsMenu = () => setOpsMenuAnchor(null);
 
   const handleOpsCopy = (e: React.MouseEvent) => {
     copyToClipboard(textSel, 'Text');
     e.preventDefault();
-    closeOperationsMenu();
+    closeOpsMenu();
     closeSelectionMenu();
   };
 
-  const handleOpsEdit = (e: React.MouseEvent) => {
+  const handleOpsEdit = React.useCallback((e: React.MouseEvent) => {
     if (messageTyping && !isEditing) return; // don't allow editing while typing
     setIsEditing(!isEditing);
     e.preventDefault();
-    closeOperationsMenu();
-  };
+    closeOpsMenu();
+  }, [isEditing, messageTyping]);
 
   const handleOpsConversationBranch = (e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation(); // to try to not steal the focus from the banched conversation
     props.onConversationBranch && props.onConversationBranch(messageId);
-    closeOperationsMenu();
+    closeOpsMenu();
   };
 
   const handleOpsConversationRestartFrom = async (e: React.MouseEvent) => {
     e.preventDefault();
-    closeOperationsMenu();
+    closeOpsMenu();
     props.onConversationRestartFrom && await props.onConversationRestartFrom(messageId, fromAssistant ? -1 : 0);
   };
 
@@ -314,7 +283,7 @@ export function ChatMessage(props: {
     e.preventDefault();
     if (props.onTextDiagram) {
       await props.onTextDiagram(messageId, textSel);
-      closeOperationsMenu();
+      closeOpsMenu();
       closeSelectionMenu();
     }
   };
@@ -323,7 +292,7 @@ export function ChatMessage(props: {
     e.preventDefault();
     if (props.onTextImagine) {
       await props.onTextImagine(textSel);
-      closeOperationsMenu();
+      closeOpsMenu();
       closeSelectionMenu();
     }
   };
@@ -332,14 +301,14 @@ export function ChatMessage(props: {
     e.preventDefault();
     if (props.onTextSpeak) {
       await props.onTextSpeak(textSel);
-      closeOperationsMenu();
+      closeOpsMenu();
       closeSelectionMenu();
     }
   };
 
   const handleOpsTruncate = (_e: React.MouseEvent) => {
     props.onConversationTruncate && props.onConversationTruncate(messageId);
-    closeOperationsMenu();
+    closeOpsMenu();
   };
 
   const handleOpsDelete = (_e: React.MouseEvent) => {
@@ -395,6 +364,17 @@ export function ChatMessage(props: {
   }, [openSelectionMenu]);
 
 
+  // Blocks renderer
+
+  const handleBlocksContextMenu = React.useCallback((event: React.MouseEvent) => {
+    handleMouseUp(event.nativeEvent);
+  }, [handleMouseUp]);
+
+  const handleBlocksDoubleClick = React.useCallback((event: React.MouseEvent) => {
+    doubleClickToEdit && props.onMessageEdit && handleOpsEdit(event);
+  }, [doubleClickToEdit, handleOpsEdit, props.onMessageEdit]);
+
+
   // prettier upstream errors
   const { isAssistantError, errorMessage } = React.useMemo(
     () => explainErrorInMessage(messageText, fromAssistant, messageOriginLLM),
@@ -410,50 +390,19 @@ export function ChatMessage(props: {
     [messageAvatar, messageOriginLLM, messagePurposeId, messageRole, messageSender, messageTyping, showAvatars],
   );
 
-  // per-blocks css
-  const blockSx: SxProps = {
-    my: 'auto',
-    lineHeight: lineHeightChatText,
-  };
-  const typographySx: SxProps = {
-    lineHeight: lineHeightChatText,
-  };
-  const codeSx: SxProps = {
-    // backgroundColor: fromAssistant ? 'background.level1' : 'background.level1',
-    backgroundColor: props.codeBackground ? props.codeBackground : fromAssistant ? 'neutral.plainHoverBg' : 'primary.plainActiveBg',
-    boxShadow: 'xs',
-    fontFamily: 'code',
-    fontSize: '0.875rem',
-    fontVariantLigatures: 'none',
-    lineHeight: lineHeightChatText,
-    borderRadius: 'var(--joy-radius-sm)',
-  };
-
-  // user message truncation
-  let collapsedText = messageText;
-  let isCollapsed = false;
-  if (fromUser && !forceUserExpanded) {
-    const lines = messageText.split('\n');
-    if (lines.length > USER_COLLAPSED_LINES) {
-      collapsedText = lines.slice(0, USER_COLLAPSED_LINES).join('\n');
-      isCollapsed = true;
-    }
-  }
-
 
   return (
     <ListItem
       sx={{
         display: 'flex', flexDirection: !fromAssistant ? 'row-reverse' : 'row', alignItems: 'flex-start',
-        gap: { xs: 0, md: 1 }, px: { xs: 1, md: 2 }, py: 2,
+        gap: { xs: 0, md: 1 },
+        px: { xs: 1, md: 2 },
+        py: 2,
         backgroundColor,
-        ...(props.noBottomBorder !== true && {
-          borderBottom: '1px solid',
-          borderBottomColor: 'divider',
-        }),
+        borderBottom: '1px solid',
+        borderBottomColor: 'divider',
         ...(ENABLE_COPY_MESSAGE_OVERLAY && { position: 'relative' }),
         '&:hover > button': { opacity: 1 },
-        ...props.sx,
       }}
     >
 
@@ -499,73 +448,26 @@ export function ChatMessage(props: {
 
         <InlineTextarea
           initialText={messageText} onEdit={handleTextEdited}
-          sx={{
-            ...blockSx,
-            flexGrow: 1,
-          }} />
+          sx={editBlocksSx}
+        />
 
       ) : (
 
-        <Box
-          onContextMenu={(ENABLE_SELECTION_RIGHT_CLICK_MENU && props.onMessageEdit) ? event => handleMouseUp(event.nativeEvent) : undefined}
-          onDoubleClick={event => (doubleClickToEdit && props.onMessageEdit) ? handleOpsEdit(event) : null}
-          sx={{
-            ...blockSx,
-            flexGrow: 0,
-            overflowX: 'auto',
-            ...(!!props.diagramMode && {
-              // width: '100%',
-              boxShadow: 'md',
-            }),
-          }}>
+        <BlocksRenderer
+          text={messageText}
+          fromRole={messageRole}
+          renderTextAsMarkdown={renderMarkdown}
+          messageTextSize={messageTextSize}
+          errorMessage={errorMessage}
+          isBottom={props.isBottom}
+          isMobile={props.isMobile}
+          showDate={props.blocksShowDate === true ? messageUpdated || messageCreated || undefined : undefined}
+          renderTextDiff={textDiffs || undefined}
+          wasUserEdited={wasEdited}
+          onContextMenu={(props.onMessageEdit && ENABLE_SELECTION_RIGHT_CLICK_MENU) ? handleBlocksContextMenu : undefined}
+          onDoubleClick={(props.onMessageEdit && doubleClickToEdit) ? handleBlocksDoubleClick : undefined}
+        />
 
-          {props.showDate === true && (
-            <Typography level='body-sm' sx={{ mx: 1.5, textAlign: fromAssistant ? 'left' : 'right' }}>
-              <TimeAgo date={messageUpdated || messageCreated} />
-            </Typography>
-          )}
-
-          {/* Warn about user-edited system message */}
-          {fromSystem && wasEdited && (
-            <Typography level='body-sm' color='warning' sx={{ mt: 1, mx: 1.5 }}>modified by user - auto-update disabled</Typography>
-          )}
-
-          {errorMessage && (
-            <Tooltip title={<Typography sx={{ maxWidth: 800 }}>{collapsedText}</Typography>} variant='soft'>
-              <InlineError error={errorMessage} />
-            </Tooltip>
-          )}
-
-          {/* sequence of render components, for each Block */}
-          {!errorMessage && parseBlocks(collapsedText, fromSystem, textDiffs)
-            .filter((block, _, blocks) => !props.diagramMode || block.type === 'code' || blocks.length === 1)
-            .map(
-              (block, index) =>
-                block.type === 'html'
-                  ? <RenderHtml key={'html-' + index} htmlBlock={block} sx={codeSx} />
-                  : block.type === 'code'
-                    ? <RenderCode key={'code-' + index} codeBlock={block} sx={codeSx} noCopyButton={props.diagramMode} />
-                    : block.type === 'image'
-                      ? <RenderImage key={'image-' + index} imageBlock={block} isFirst={!index} allowRunAgain={props.isBottom === true} onRunAgain={handleOpsConversationRestartFrom} />
-                      : block.type === 'latex'
-                        ? <RenderLatex key={'latex-' + index} latexBlock={block} sx={typographySx} />
-                        : block.type === 'diff'
-                          ? <RenderTextDiff key={'latex-' + index} diffBlock={block} sx={typographySx} />
-                          : (renderMarkdown && props.noMarkdown !== true && !fromSystem && !(fromUser && block.content.startsWith('/')))
-                            ? <RenderMarkdown key={'text-md-' + index} textBlock={block} />
-                            : <RenderText key={'text-' + index} textBlock={block} sx={typographySx} />)}
-
-          {isCollapsed && (
-            <Button variant='plain' color='neutral' onClick={handleUncollapse}>... expand ...</Button>
-          )}
-
-          {/* import VisibilityIcon from '@mui/icons-material/Visibility'; */}
-          {/*<br />*/}
-          {/*<Chip variant='outlined' color='warning' sx={{ mt: 1, fontSize: '0.75em' }} startDecorator={<VisibilityIcon />}>*/}
-          {/*  BlockAction*/}
-          {/*</Chip>*/}
-
-        </Box>
       )}
 
 
@@ -587,9 +489,11 @@ export function ChatMessage(props: {
       {/* Operations Menu (3 dots) */}
       {!!opsMenuAnchor && (
         <CloseableMenu
-          dense placement='bottom-end' sx={{ minWidth: 280 }}
-          open anchorEl={opsMenuAnchor} onClose={closeOperationsMenu}
+          dense placement='bottom-end'
+          open anchorEl={opsMenuAnchor} onClose={closeOpsMenu}
+          sx={{ minWidth: 280 }}
         >
+          {/* Edit / Copy */}
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             {!!props.onMessageEdit && (
               <MenuItem variant='plain' disabled={messageTyping} onClick={handleOpsEdit} sx={{ flex: 1 }}>
@@ -603,6 +507,32 @@ export function ChatMessage(props: {
               Copy
             </MenuItem>
           </Box>
+          {/* Delete / Branch / Truncate */}
+          {!!props.onMessageDelete && <ListDivider />}
+          {!!props.onMessageDelete && (
+            <MenuItem onClick={handleOpsDelete} disabled={false /*fromSystem*/}>
+              <ListItemDecorator><ClearIcon /></ListItemDecorator>
+              Delete
+              <span style={{ opacity: 0.5 }}>message</span>
+            </MenuItem>
+          )}
+          {!!props.onConversationBranch && (
+            <MenuItem onClick={handleOpsConversationBranch} disabled={fromSystem}>
+              <ListItemDecorator>
+                <ForkRightIcon />
+              </ListItemDecorator>
+              Branch
+              {!props.isBottom && <span style={{ opacity: 0.5 }}>from here</span>}
+            </MenuItem>
+          )}
+          {!!props.onConversationTruncate && (
+            <MenuItem onClick={handleOpsTruncate} disabled={props.isBottom}>
+              <ListItemDecorator><VerticalAlignBottomIcon /></ListItemDecorator>
+              Truncate
+              <span style={{ opacity: 0.5 }}>after this</span>
+            </MenuItem>
+          )}
+          {/* Diff Viewer */}
           {!!props.diffPreviousText && <ListDivider />}
           {!!props.diffPreviousText && (
             <MenuItem onClick={handleOpsToggleShowDiff}>
@@ -611,10 +541,31 @@ export function ChatMessage(props: {
               <Switch checked={showDiff} onChange={handleOpsToggleShowDiff} sx={{ ml: 'auto' }} />
             </MenuItem>
           )}
-          <ListDivider />
+          {/* Diagram / Draw / Speak */}
+          {!!props.onTextDiagram && <ListDivider />}
+          {!!props.onTextDiagram && (
+            <MenuItem onClick={handleOpsDiagram} disabled={!couldDiagram}>
+              <ListItemDecorator><AccountTreeIcon color='success' /></ListItemDecorator>
+              Diagram ...
+            </MenuItem>
+          )}
+          {!!props.onTextImagine && (
+            <MenuItem onClick={handleOpsImagine} disabled={!couldImagine || props.isImagining}>
+              <ListItemDecorator>{props.isImagining ? <CircularProgress size='sm' /> : <FormatPaintIcon color='success' />}</ListItemDecorator>
+              Draw ...
+            </MenuItem>
+          )}
+          {!!props.onTextSpeak && (
+            <MenuItem onClick={handleOpsSpeak} disabled={!couldSpeak || props.isSpeaking}>
+              <ListItemDecorator>{props.isSpeaking ? <CircularProgress size='sm' /> : <RecordVoiceOverIcon color='success' />}</ListItemDecorator>
+              Speak
+            </MenuItem>
+          )}
+          {/* Restart/try */}
+          {!!props.onConversationRestartFrom && <ListDivider />}
           {!!props.onConversationRestartFrom && (
             <MenuItem onClick={handleOpsConversationRestartFrom}>
-              <ListItemDecorator>{fromAssistant ? <ReplayIcon /> : <TelegramIcon />}</ListItemDecorator>
+              <ListItemDecorator>{fromAssistant ? <ReplayIcon color='primary' /> : <TelegramIcon color='primary' />}</ListItemDecorator>
               {!fromAssistant
                 ? <>Restart <span style={{ opacity: 0.5 }}>from here</span></>
                 : !props.isBottom
@@ -622,42 +573,7 @@ export function ChatMessage(props: {
                   : <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'space-between', gap: 1 }}>
                     Retry
                     <KeyStroke combo='Ctrl + Shift + R' />
-                  </Box>
-              }
-            </MenuItem>
-          )}
-          {!!props.onConversationBranch && (
-            <MenuItem onClick={handleOpsConversationBranch} disabled={fromSystem}>
-              <ListItemDecorator>
-                <ForkRightIcon />
-              </ListItemDecorator>
-              Branch {!props.isBottom && <span style={{ opacity: 0.5 }}>from here</span>}
-            </MenuItem>
-          )}
-          {!!props.onConversationBranch && <ListDivider />}
-          {!!props.onTextDiagram && <MenuItem onClick={handleOpsDiagram} disabled={!couldDiagram}>
-            <ListItemDecorator><AccountTreeIcon color='success' /></ListItemDecorator>
-            Diagram ...
-          </MenuItem>}
-          {!!props.onTextImagine && <MenuItem onClick={handleOpsImagine} disabled={!couldImagine || props.isImagining}>
-            <ListItemDecorator>{props.isImagining ? <CircularProgress size='sm' /> : <FormatPaintIcon color='success' />}</ListItemDecorator>
-            Draw ...
-          </MenuItem>}
-          {!!props.onTextSpeak && <MenuItem onClick={handleOpsSpeak} disabled={!couldSpeak || props.isSpeaking}>
-            <ListItemDecorator>{props.isSpeaking ? <CircularProgress size='sm' /> : <RecordVoiceOverIcon color='success' />}</ListItemDecorator>
-            Speak
-          </MenuItem>}
-          {!!props.onConversationRestartFrom && <ListDivider />}
-          {!!props.onConversationTruncate && (
-            <MenuItem onClick={handleOpsTruncate} disabled={props.isBottom}>
-              <ListItemDecorator><VerticalAlignBottomIcon /></ListItemDecorator>
-              Truncate <span style={{ opacity: 0.5 }}>after</span>
-            </MenuItem>
-          )}
-          {!!props.onMessageDelete && (
-            <MenuItem onClick={handleOpsDelete} disabled={false /*fromSystem*/}>
-              <ListItemDecorator><ClearIcon /></ListItemDecorator>
-              Delete <span style={{ opacity: 0.5 }}>message</span>
+                  </Box>}
             </MenuItem>
           )}
         </CloseableMenu>
@@ -666,8 +582,9 @@ export function ChatMessage(props: {
       {/* Selection (Contextual) Menu */}
       {!!selMenuAnchor && (
         <CloseableMenu
-          dense placement='bottom-start' sx={{ minWidth: 220 }}
+          dense placement='bottom-start'
           open anchorEl={selMenuAnchor} onClose={closeSelectionMenu}
+          sx={{ minWidth: 220 }}
         >
           <MenuItem onClick={handleOpsCopy} sx={{ flex: 1 }}>
             <ListItemDecorator><ContentCopyIcon /></ListItemDecorator>

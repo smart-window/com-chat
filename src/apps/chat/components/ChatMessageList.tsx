@@ -26,12 +26,14 @@ export function ChatMessageList(props: {
   conversationId: DConversationId | null,
   capabilityHasT2I: boolean,
   chatLLMContextTokens: number | null,
-  isMessageSelectionMode: boolean, setIsMessageSelectionMode: (isMessageSelectionMode: boolean) => void,
+  isMessageSelectionMode: boolean,
+  isMobile: boolean,
   onConversationBranch: (conversationId: DConversationId, messageId: string) => void,
   onConversationExecuteHistory: (conversationId: DConversationId, history: DMessage[]) => Promise<void>,
   onTextDiagram: (diagramConfig: DiagramConfig | null) => void,
   onTextImagine: (conversationId: DConversationId, selectedText: string) => Promise<void>,
   onTextSpeak: (selectedText: string) => Promise<void>,
+  setIsMessageSelectionMode: (isMessageSelectionMode: boolean) => void,
   sx?: SxProps,
 }) {
 
@@ -148,17 +150,17 @@ export function ChatMessageList(props: {
   });
 
 
-  // text-diff functionality, find the messages to diff with
+  // text-diff functionality: only diff the last message and when it's complete (not typing), and they're similar in size
 
-  const { diffMessage, diffText } = React.useMemo(() => {
+  const { diffTargetMessage, diffPrevText } = React.useMemo(() => {
     const [msgB, msgA] = conversationMessages.filter(m => m.role === 'assistant').reverse();
     if (msgB?.text && msgA?.text && !msgB?.typing) {
       const textA = msgA.text, textB = msgB.text;
       const lenA = textA.length, lenB = textB.length;
       if (lenA > 80 && lenB > 80 && lenA > lenB / 3 && lenB > lenA / 3)
-        return { diffMessage: msgB, diffText: textA };
+        return { diffTargetMessage: msgB, diffPrevText: textA };
     }
-    return { diffMessage: undefined, diffText: undefined };
+    return { diffTargetMessage: undefined, diffPrevText: undefined };
   }, [conversationMessages]);
 
 
@@ -219,9 +221,11 @@ export function ChatMessageList(props: {
           <ChatMessageMemo
             key={'msg-' + message.id}
             message={message}
-            diffPreviousText={message === diffMessage ? diffText : undefined}
+            diffPreviousText={message === diffTargetMessage ? diffPrevText : undefined}
             isBottom={idx === count - 1}
-            isImagining={isImagining} isSpeaking={isSpeaking}
+            isImagining={isImagining}
+            isMobile={props.isMobile}
+            isSpeaking={isSpeaking}
             onConversationBranch={handleConversationBranch}
             onConversationRestartFrom={handleConversationRestartFrom}
             onConversationTruncate={handleConversationTruncate}

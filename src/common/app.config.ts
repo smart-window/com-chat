@@ -12,10 +12,10 @@ export const Brand = {
     Common: (process.env.NODE_ENV === 'development' ? '[DEV] ' : '') + 'COM Chat',
   },
   Meta: {
-    Description: 'Launch com-chat to unlock the full potential of AI, with precise control over your data and models. Voice interface, AI personas, advanced features, and fun UX.',
-    SiteName: 'COM-Chat | Precision AI for You',
+    Description: 'Launch COM Chat to unlock the full potential of AI, with precise control over your data and models. Voice interface, AI personas, advanced features, and fun UX.',
+    SiteName: 'COM Chat | Precision AI for You',
     ThemeColor: '#32383E',
-    TwitterSite: '@smart_window',
+    TwitterSite: '@smartwindow917',
   },
   URIs: {
     Home: 'https://comchat.io',

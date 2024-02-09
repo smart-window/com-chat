@@ -2,11 +2,14 @@ import * as React from 'react';
 import { z } from 'zod';
 
 import { Typography } from '@mui/joy';
+import YouTubeIcon from '@mui/icons-material/YouTube';
 
+import { ExpanderAccordion } from '~/common/components/ExpanderAccordion';
 import { FormInputKey } from '~/common/components/forms/FormInputKey';
 import { InlineError } from '~/common/components/InlineError';
 import { Link } from '~/common/components/Link';
 import { SetupFormRefetchButton } from '~/common/components/forms/SetupFormRefetchButton';
+import { VideoPlayer } from '~/common/components/VideoPlayer';
 
 import { DModelSourceId } from '../../store-llms';
 import { useLlmUpdateModels } from '../useLlmUpdateModels';
@@ -35,15 +38,25 @@ export function LMStudioSourceSetup(props: { sourceId: DModelSourceId }) {
 
   return <>
 
+    <ExpanderAccordion
+      title={<Typography level='title-sm' sx={{ mr: 'auto' }}>Video Tutorial</Typography>}
+      icon={<YouTubeIcon sx={{ color: '#f00' }} />}
+      startCollapsed
+    >
+      <VideoPlayer width='100%' youTubeVideoId='MqXzxVokMDk' playing={true} />
+    </ExpanderAccordion>
+
     <Typography level='body-sm'>
       You can use a running <Link href='https://lmstudio.ai/' target='_blank'>LM Studio</Link> instance as a source
-      for local models. Please refer to the LM Studio configuration for how to turn on the local server.
+      for local models. Please refer to our <Link
+      level='body-sm' href='https://github.com/smart-window/com-chat/blob/main/docs/config-lmstudio.md' target='_blank'>configuration guide</Link> for
+      how to link to your LM Studio instance.
     </Typography>
 
     <FormInputKey
       id='lmstudio-url' label='LM Studio API'
       required noKey
-      rightLabel={<Link level='body-sm' href='https://lmstudio.ai/' target='_blank'>Learn more</Link>}
+      rightLabel={<Link level='body-sm' href='https://github.com/smart-window/com-chat/blob/main/docs/config-lmstudio.md' target='_blank'>Learn more</Link>}
       placeholder='e.g., http://127.0.0.1:1234'
       value={oaiHost} onChange={value => updateSetup({ oaiHost: value })}
     />

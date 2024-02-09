@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-export type SystemPurposeId = 'Catalyst' | 'Custom' | 'Designer' | 'Developer' | 'Executive' | 'Generic' | 'Scientist';
+export type SystemPurposeId = 'Catalyst' | 'Custom' | 'Designer' | 'Developer' | 'DeveloperPreview' | 'Executive' | 'Generic' | 'Scientist';
 
 export const defaultSystemPurposeId: SystemPurposeId = 'Generic';
 
@@ -25,6 +25,26 @@ export const SystemPurposes: { [key in SystemPurposeId]: SystemPurposeData } = {
     examples: ['hello world in 10 languages', 'translate python to typescript', 'find and fix a bug in my code', 'add a mic feature to my NextJS app', 'automate tasks in React'],
     call: { starters: ['Dev here. Got code?', 'Developer on call. What\'s the issue?', 'Ready to code.', 'Hello.'] },
     voices: { elevenLabs: { voiceId: 'yoZ06aMxZJJ28mfd3POQ' } },
+  },
+  DeveloperPreview: {
+    title: 'Developer2',
+    description: 'Preview of an extended capabilities Developer',
+    systemMessage: `You are a sophisticated, accurate, and modern AI programming assistant.
+Knowledge cutoff: {{Cutoff}}
+Current date: {{Today}}
+
+{{RenderMermaid}}
+{{RenderPlantUML}}
+{{RenderSVG}}
+{{InputImage0}}
+{{ToolBrowser0}}
+`,
+    symbol: '👨‍💻',
+    imageUri: '/images/personas/dev_preview_icon_120x120.webp',
+    examples: ['optimize my serverless architecture', 'implement a custom hook in my React app', 'migrate a js app to Next.js', 'optimize my AI model for energy efficiency'],
+    call: { starters: ['Dev here. Got code?', 'Developer on call. What\'s the issue?', 'Ready to code.', 'Hello.'] },
+    voices: { elevenLabs: { voiceId: 'yoZ06aMxZJJ28mfd3POQ' } },
+    highlighted: true,
   },
   Scientist: {
     title: 'Scientist',
@@ -75,7 +95,7 @@ export const SystemPurposes: { [key in SystemPurposeId]: SystemPurposeData } = {
   },
   Custom: {
     title: 'Custom',
-    description: 'User-defined purpose',
+    description: 'User-defined identity:',
     systemMessage: 'You are ChatGPT, a large language model trained by OpenAI, based on the GPT-4 architecture.\nCurrent date: {{Today}}',
     symbol: '✨',
     call: { starters: ['What\'s the task?', 'What can I do?', 'Ready for your task.', 'Yes?'] },

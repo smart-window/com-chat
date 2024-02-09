@@ -269,7 +269,7 @@ export function Contacts(props: { setCallIntent: (intent: AppCallIntent) => void
 
   return <>
 
-    {/* Header "Call AGI" */}
+    {/* Header "Call AI" */}
     <Box sx={{
       my: 6,
       display: 'flex', alignItems: 'center',
@@ -289,7 +289,7 @@ export function Contacts(props: { setCallIntent: (intent: AppCallIntent) => void
 
       <Box>
         <Typography level='title-lg'>
-          Call AGI
+          Call AI
         </Typography>
         <Typography level='title-sm' sx={{ mt: 1 }}>
           Explore ideas and ignite creativity

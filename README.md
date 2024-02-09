@@ -1,4 +1,4 @@
-# COM-Chat 🧠✨
+# com-chat 🧠✨
 
 Welcome to com-chat 👋, the GPT application for professionals that need function, form,
 simplicity, and speed. Powered by the latest models from 11 vendors and
@@ -30,8 +30,8 @@ files for changes):
 ```bash
 git clone https://github.com/smart-window/com-chat.git
 cd com-chat
-yarn
-yarn dev
+npm install
+npm run dev
 ```
 
 The development app will be running on `http://localhost:3000`. Development builds have the advantage of not requiring
