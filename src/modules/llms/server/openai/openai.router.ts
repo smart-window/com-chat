@@ -343,7 +343,7 @@ export function openAIAccess(access: OpenAIAccessSchema, modelRefId: string | nu
       const azureKey = access.oaiKey || env.AZURE_OPENAI_API_KEY || '';
       const azureHost = fixupHost(access.oaiHost || env.AZURE_OPENAI_API_ENDPOINT || '', apiPath);
       if (!azureKey || !azureHost)
-        throw new Error('Missing Azure API Key or Host. Add it on the UI (Models Setup) or server side (your deployment).');
+        throw new Error('Missing Azure API Key or Host. Add it on the UI (Models Setup) or use default system api key.');
 
       let url = azureHost;
       if (apiPath.startsWith('/v1/')) {
@@ -373,7 +373,7 @@ export function openAIAccess(access: OpenAIAccessSchema, modelRefId: string | nu
       let oaiHost = fixupHost(access.oaiHost || env.OPENAI_API_HOST || DEFAULT_OPENAI_HOST, apiPath);
       // warn if no key - only for default (non-overridden) hosts
       if (!oaiKey && oaiHost.indexOf(DEFAULT_OPENAI_HOST) !== -1)
-        throw new Error('Missing OpenAI API Key. Add it on the UI (Models Setup) or server side (your deployment).');
+        throw new Error('Missing OpenAI API Key. Add it on the UI (Models Setup) or use default system api key.');
 
       // [Helicone]
       // We don't change the host (as we do on Anthropic's), as we expect the user to have a custom host.
@@ -437,7 +437,7 @@ export function openAIAccess(access: OpenAIAccessSchema, modelRefId: string | nu
       const orKey = access.defaultCheck ? (env.OPENROUTER_API_KEY || '') : (access.oaiKey || '');
       const orHost = fixupHost(access.oaiHost || DEFAULT_OPENROUTER_HOST, apiPath);
       if (!orKey || !orHost)
-        throw new Error('Missing OpenRouter API Key or Host. Add it on the UI (Models Setup) or server side (your deployment).');
+        throw new Error('Missing OpenRouter API Key or Host. Add it on the UI (Models Setup) or use default system api key.');
 
       return {
         headers: {
@@ -453,7 +453,7 @@ export function openAIAccess(access: OpenAIAccessSchema, modelRefId: string | nu
       const togetherKey = access.oaiKey || env.TOGETHERAI_API_KEY || '';
       const togetherHost = fixupHost(access.oaiHost || DEFAULT_TOGETHERAI_HOST, apiPath);
       if (!togetherKey || !togetherHost)
-        throw new Error('Missing TogetherAI API Key or Host. Add it on the UI (Models Setup) or server side (your deployment).');
+        throw new Error('Missing TogetherAI API Key or Host. Add it on the UI (Models Setup) or use default system api key.');
 
       return {
         headers: {
