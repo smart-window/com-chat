@@ -31,6 +31,7 @@ interface OptimaLayoutState {
   // optima modals that can overlay anything
   showPreferencesTab: PreferencesTabType;
   showModelsSetup: boolean;
+  showWallet: boolean;
   showLlmOptions: DLLMId | null;
   showShortcuts: boolean;
 
@@ -47,6 +48,7 @@ const initialState: OptimaLayoutState = {
 
   showPreferencesTab: 0, // 0 = closed, 1+ open tab n-1
   showModelsSetup: false,
+  showWallet: false,
   showLlmOptions: null,
   showShortcuts: false,
 
@@ -68,6 +70,9 @@ interface OptimaLayoutActions {
 
   openModelsSetup: () => void;
   closeModelsSetup: () => void;
+
+  openWallet: () => void;
+  closeWallet: () => void;
 
   openLlmOptions: (id: DLLMId) => void;
   closeLlmOptions: () => void;
@@ -101,6 +106,9 @@ export function OptimaLayoutProvider(props: { children: React.ReactNode }) {
 
     openModelsSetup: () => setState(state => ({ ...state, showModelsSetup: true })),
     closeModelsSetup: () => setState(state => ({ ...state, showModelsSetup: false })),
+
+    openWallet: () => setState(state => ({ ...state, showWallet: true })),
+    closeWallet: () => setState(state => ({ ...state, showWallet: false })),
 
     openLlmOptions: (id: DLLMId) => setState(state => ({ ...state, showLlmOptions: id })),
     closeLlmOptions: () => setState(state => ({ ...state, showLlmOptions: null })),
