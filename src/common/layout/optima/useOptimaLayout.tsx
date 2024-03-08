@@ -32,6 +32,7 @@ interface OptimaLayoutState {
   showPreferencesTab: PreferencesTabType;
   showModelsSetup: boolean;
   showWallet: boolean;
+  showAPI: boolean;
   showLlmOptions: DLLMId | null;
   showShortcuts: boolean;
 
@@ -49,6 +50,7 @@ const initialState: OptimaLayoutState = {
   showPreferencesTab: 0, // 0 = closed, 1+ open tab n-1
   showModelsSetup: false,
   showWallet: false,
+  showAPI: false,
   showLlmOptions: null,
   showShortcuts: false,
 
@@ -73,6 +75,9 @@ interface OptimaLayoutActions {
 
   openWallet: () => void;
   closeWallet: () => void;
+
+  openAPI: () => void;
+  closeAPI: () => void;
 
   openLlmOptions: (id: DLLMId) => void;
   closeLlmOptions: () => void;
@@ -109,6 +114,9 @@ export function OptimaLayoutProvider(props: { children: React.ReactNode }) {
 
     openWallet: () => setState(state => ({ ...state, showWallet: true })),
     closeWallet: () => setState(state => ({ ...state, showWallet: false })),
+
+    openAPI: () => setState(state => ({ ...state, showAPI: true })),
+    closeAPI: () => setState(state => ({ ...state, showAPI: false })),
 
     openLlmOptions: (id: DLLMId) => setState(state => ({ ...state, showLlmOptions: id })),
     closeLlmOptions: () => setState(state => ({ ...state, showLlmOptions: null })),

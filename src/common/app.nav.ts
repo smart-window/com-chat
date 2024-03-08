@@ -28,6 +28,7 @@ import { DiscordIcon } from '~/common/components/icons/DiscordIcon';
 import BuildCircleIcon from '@mui/icons-material/BuildCircle';
 import SettingsIcon from '@mui/icons-material/Settings';
 import WalletIcon from '@mui/icons-material/Wallet';
+import ApiIcon from '@mui/icons-material/Api';
 
 import { Brand } from '~/common/app.config';
 import { hasNoChatLinkItems } from '~/modules/trade/link/store-link';
@@ -66,7 +67,7 @@ export interface NavItemApp extends ItemBase {
 
 export interface NavItemModal extends ItemBase {
   type: 'modal',
-  overlayId: 'settings' | 'models' | 'wallet',
+  overlayId: 'settings' | 'models' | 'wallet' | 'api',
 }
 
 export interface NavItemExtLink extends ItemBase {
@@ -189,6 +190,12 @@ export const navItems: {
 
   // Modals
   modals: [
+    {
+      name: 'API',
+      icon: ApiIcon,
+      type: 'modal',
+      overlayId: 'api',
+    },
     {
       name: 'Wallet',
       icon: WalletIcon,

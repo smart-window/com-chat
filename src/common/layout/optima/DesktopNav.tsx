@@ -33,6 +33,7 @@ export function DesktopNav(props: { component: React.ElementType, currentApp?: N
     showPreferencesTab, openPreferencesTab,
     showModelsSetup, openModelsSetup,
     showWallet, openWallet,
+    showAPI, openAPI,
   } = useOptimaLayout();
   const noLLMs = useModelsStore(state => !state.llms.length);
 
@@ -101,6 +102,7 @@ export function DesktopNav(props: { component: React.ElementType, currentApp?: N
         settings: { isActive: !!showPreferencesTab, showModal: () => openPreferencesTab() },
         models: { isActive: showModelsSetup, showModal: openModelsSetup },
         wallet: { isActive: showWallet, showModal: openWallet },
+        api: { isActive: showAPI, showModal: openAPI },
         0: { isActive: false, showModal: () => console.log('Action missing for ', item.overlayId) },
       };
       const { isActive, showModal } = stateActionMap[item.overlayId] ?? stateActionMap[0];
@@ -120,7 +122,7 @@ export function DesktopNav(props: { component: React.ElementType, currentApp?: N
         </Tooltip>
       );
     });
-  }, [noLLMs, openModelsSetup, openPreferencesTab, openWallet, showModelsSetup, showPreferencesTab, showWallet]);
+  }, [noLLMs, openModelsSetup, openPreferencesTab, openWallet, showModelsSetup, showPreferencesTab, showWallet, showAPI]);
 
 
   return (
