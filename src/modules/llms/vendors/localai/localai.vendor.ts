@@ -1,4 +1,4 @@
-import DevicesIcon from '@mui/icons-material/Devices';
+import { LocalAIIcon } from '~/common/components/icons/vendors/LocalAIIcon';
 
 import type { IModelVendor } from '../IModelVendor';
 import type { OpenAIAccessSchema } from '../../server/openai/openai.router';
@@ -7,10 +7,12 @@ import { LLMOptionsOpenAI, ModelVendorOpenAI } from '../openai/openai.vendor';
 import { OpenAILLMOptions } from '../openai/OpenAILLMOptions';
 
 import { LocalAISourceSetup } from './LocalAISourceSetup';
+import { backendCaps } from '~/modules/backend/state-backend';
 
 
 export interface SourceSetupLocalAI {
-  oaiHost: string;  // use OpenAI-compatible non-default hosts (full origin path)
+  localAIHost: string;  // use OpenAI-compatible non-default hosts (full origin path)
+  localAIKey: string;   // use OpenAI-compatible API keys
 }
 
 export const ModelVendorLocalAI: IModelVendor<SourceSetupLocalAI, OpenAIAccessSchema, LLMOptionsOpenAI> = {
@@ -18,22 +20,27 @@ export const ModelVendorLocalAI: IModelVendor<SourceSetupLocalAI, OpenAIAccessSc
   name: 'LocalAI',
   rank: 22,
   location: 'local',
-  instanceLimit: 1,
+  instanceLimit: 4,
+  hasBackendCap: () => {
+    const { hasLlmLocalAIHost, hasLlmLocalAIKey } = backendCaps();
+    return hasLlmLocalAIHost || hasLlmLocalAIKey;
+  },
 
   // components
-  Icon: DevicesIcon,
+  Icon: LocalAIIcon,
   SourceSetupComponent: LocalAISourceSetup,
   LLMOptionsComponent: OpenAILLMOptions,
 
   // functions
   initializeSetup: () => ({
-    oaiHost: 'http://localhost:8080',
+    localAIHost: '',
+    localAIKey: '',
   }),
   getTransportAccess: (partialSetup) => ({
     dialect: 'localai',
-    oaiKey: '',
+    oaiKey: partialSetup?.localAIKey || '',
     oaiOrg: '',
-    oaiHost: partialSetup?.oaiHost || '',
+    oaiHost: partialSetup?.localAIHost || '',
     heliKey: '',
     moderationCheck: false,
     defaultCheck: false,

@@ -12,17 +12,17 @@ export const Brand = {
     Common: (process.env.NODE_ENV === 'development' ? '[DEV] ' : '') + 'COM Chat',
   },
   Meta: {
-    Description: 'Launch COM Chat to unlock the full potential of AI, with precise control over your data and models. Voice interface, AI personas, advanced features, and fun UX.',
-    SiteName: 'COM Chat | Precision AI for You',
+    Description: 'Launch com-chat to unlock the full potential of AI, with precise control over your data and models. Voice interface, AI personas, advanced features, and fun UX.',
+    SiteName: 'com-chat | Precision AI for You',
     ThemeColor: '#32383E',
-    TwitterSite: '@smartwindow917',
+    TwitterSite: '@comchat_io',
   },
   URIs: {
-    Home: 'https://comchat.io',
-    CardImage: 'https://comchat.io/icons/card-dark-1200.png',
+    Home: 'https://com-chat.io',
+    CardImage: 'https://com-chat.io/icons/card-dark-1200.png',
     OpenRepo: 'https://github.com/smart-window/com-chat',
-    OpenProject: 'https://github.com/smart-window/com-chat',
-    SupportInvite: 'https://discord.gg/bK2w2HZtqQ',
-    PrivacyPolicy: 'https://comchat.io/privacy',
+    OpenProject: 'https://github.com/users/smart-window',
+    SupportInvite: 'https://discord.gg/communeai',
+    PrivacyPolicy: 'https://com-chat.io/privacy',
   },
-};
+} as const;

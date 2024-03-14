@@ -4,19 +4,20 @@ import type { SxProps } from '@mui/joy/styles/types';
 import { Box, Button, ButtonGroup, Chip, Divider, IconButton, Typography } from '@mui/joy';
 import FormatPaintIcon from '@mui/icons-material/FormatPaint';
 
-import { niceShadowKeyframes } from '../../call/Contacts';
+import { animationShadowLimey } from '~/common/util/animUtils';
 
 
 export function DrawHeading(props: {
   section: number,
   setSection: (section: number) => void,
   showSections?: boolean,
+  onRemoveHeading?: () => void,
   sx?: SxProps,
 }) {
 
   return (
 
-    <Box sx={{
+    <Box onClick={props.onRemoveHeading} sx={{
       display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 3,
       ...props.sx,
     }}>
@@ -29,7 +30,7 @@ export function DrawHeading(props: {
           borderRadius: '50%',
           pointerEvents: 'none',
           backgroundColor: 'background.popup',
-          animation: `${niceShadowKeyframes} 5s infinite`,
+          animation: `${animationShadowLimey} 5s infinite`,
         }}>
         <FormatPaintIcon />
       </IconButton>

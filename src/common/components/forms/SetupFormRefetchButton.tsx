@@ -15,7 +15,7 @@ export function SetupFormRefetchButton(props: {
   loading: boolean,
   error: boolean,
   leftButton?: React.ReactNode,
-  advanced?: ToggleableBoolean,
+  advanced?: ToggleableBoolean
   defaultCheck?: boolean
 }) {
   return (

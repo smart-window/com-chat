@@ -51,7 +51,7 @@ export const ModelVendorOpenRouter: IModelVendor<SourceSetupOpenRouter, OpenAIAc
     oaiHost: 'https://openrouter.ai/api',
     oaiKey: '',
     defaultCheck: true
-}),
+  }),
   getTransportAccess: (partialSetup: OpenAIAccessSchema): OpenAIAccessSchema => ({
     dialect: 'openrouter',
     oaiKey: partialSetup?.oaiKey || '',

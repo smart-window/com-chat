@@ -8,7 +8,6 @@ import AutoAwesomeOutlinedIcon from '@mui/icons-material/AutoAwesomeOutlined';
 import CallIcon from '@mui/icons-material/Call';
 import CallOutlinedIcon from '@mui/icons-material/CallOutlined';
 import Diversity2Icon from '@mui/icons-material/Diversity2';
-import Diversity2OutlinedIcon from '@mui/icons-material/Diversity2Outlined';
 import EventNoteIcon from '@mui/icons-material/EventNote';
 import EventNoteOutlinedIcon from '@mui/icons-material/EventNoteOutlined';
 import FormatPaintIcon from '@mui/icons-material/FormatPaint';
@@ -22,15 +21,17 @@ import TextsmsOutlinedIcon from '@mui/icons-material/TextsmsOutlined';
 import WorkspacesIcon from '@mui/icons-material/Workspaces';
 import WorkspacesOutlinedIcon from '@mui/icons-material/WorkspacesOutlined';
 // Link icons
-// import GitHubIcon from '@mui/icons-material/GitHub';
-import { DiscordIcon } from '~/common/components/icons/DiscordIcon';
+import GitHubIcon from '@mui/icons-material/GitHub';
+import { DiscordIcon } from '~/common/components/icons/3rdparty/DiscordIcon';
 // Modal icons
 import BuildCircleIcon from '@mui/icons-material/BuildCircle';
 import SettingsIcon from '@mui/icons-material/Settings';
 import WalletIcon from '@mui/icons-material/Wallet';
 import ApiIcon from '@mui/icons-material/Api';
 
+
 import { Brand } from '~/common/app.config';
+import { ChatBeamIcon } from '~/common/components/icons/ChatBeamIcon';
 import { hasNoChatLinkItems } from '~/modules/trade/link/store-link';
 
 
@@ -62,6 +63,7 @@ export interface NavItemApp extends ItemBase {
   hideNav?: boolean
     | (() => boolean),    // set to hide the Nav bar (note: must have a way to navigate back)
   fullWidth?: boolean,    // set to true to override the user preference
+  isDev?: boolean,        // show a 'dev mode' badge
   _delete?: boolean,      // delete from the UI
 }
 
@@ -115,6 +117,7 @@ export const navItems: {
       route: '/draw',
       // hideOnMobile: true,
       hideDrawer: true,
+      isDev: true,
       _delete: true,
     },
     {
@@ -123,6 +126,7 @@ export const navItems: {
       iconActive: AutoAwesomeIcon,
       type: 'app',
       route: '/cortex',
+      isDev: true,
       _delete: true,
     },
     {
@@ -131,6 +135,7 @@ export const navItems: {
       iconActive: AccountTreeIcon,
       type: 'app',
       route: '/patterns',
+      isDev: true,
       _delete: true,
     },
     {
@@ -141,6 +146,7 @@ export const navItems: {
       route: '/workspace',
       hideDrawer: true,
       hideOnMobile: true,
+      isDev: true,
       _delete: true,
     },
     // <-- divider here -->
@@ -152,11 +158,20 @@ export const navItems: {
     },
     {
       name: 'Personas',
-      icon: Diversity2OutlinedIcon,
-      iconActive: Diversity2Icon,
+      icon: Diversity2Icon, // was: Outlined.. but they look the same
+      // iconActive: Diversity2Icon,
       type: 'app',
       route: '/personas',
       hideBar: true,
+    },
+    {
+      name: 'Beam',
+      icon: ChatBeamIcon,
+      type: 'app',
+      route: '/dev/beam',
+      hideDrawer: true,
+      hideIcon: true,
+      isDev: true,
     },
     {
       name: 'Media Library',
@@ -164,6 +179,7 @@ export const navItems: {
       iconActive: ImageIcon,
       type: 'app',
       route: '/media',
+      isDev: true,
       _delete: true,
     },
     {
@@ -176,15 +192,6 @@ export const navItems: {
       hideOnMobile: true,
       hideIcon: hasNoChatLinkItems,
       hideNav: hasNoChatLinkItems,
-    },
-    {
-      name: 'News',
-      icon: EventNoteOutlinedIcon,
-      iconActive: EventNoteIcon,
-      type: 'app',
-      route: '/news',
-      hideBar: true,
-      hideDrawer: true,
     },
   ],
 
@@ -230,12 +237,6 @@ export const navItems: {
       icon: DiscordIcon,
       href: Brand.URIs.SupportInvite,
     },
-    // {
-    //   type: 'extLink',
-    //   name: 'GitHub',
-    //   icon: GitHubIcon,
-    //   href: Brand.URIs.OpenRepo,
-    // },
   ],
 
 };

@@ -5,12 +5,12 @@ import { env } from '~/server/env.mjs';
 import packageJson from '../../../../../package.json';
 
 import { createTRPCRouter, publicProcedure } from '~/server/api/trpc.server';
-import { fetchJsonOrTRPCError } from '~/server/api/trpc.serverutils';
+import { fetchJsonOrTRPCError } from '~/server/api/trpc.router.fetchers';
 
 import { fixupHost } from '~/common/util/urlUtils';
 
 import { LLM_IF_OAI_Chat, LLM_IF_OAI_Vision } from '../../store-llms';
-import { llmsListModelsOutputSchema, ModelDescriptionSchema, llmsChatGenerateOutputSchema } from '../llm.server.types';
+import { llmsChatGenerateOutputSchema, llmsListModelsOutputSchema, ModelDescriptionSchema } from '../llm.server.types';
 
 import { OpenAIHistorySchema, openAIHistorySchema, OpenAIModelSchema, openAIModelSchema } from '../openai/openai.router';
 
@@ -150,8 +150,11 @@ export const llmGeminiRouter = createTRPCRouter({
         models: detailedModels.map((geminiModel) => {
           const { description, displayName, inputTokenLimit, name, outputTokenLimit, supportedGenerationMethods } = geminiModel;
 
+          const isSymlink = ['models/gemini-pro', 'models/gemini-pro-vision'].includes(name);
+          const symlinked = isSymlink ? detailedModels.find(m => m.displayName === displayName && m.name !== name) : null;
+
           const contextWindow = inputTokenLimit + outputTokenLimit;
-          const hidden = !supportedGenerationMethods.includes('generateContent');
+          const hidden = !supportedGenerationMethods.includes('generateContent') || isSymlink;
 
           const { version, topK, topP, temperature } = geminiModel;
           const descriptionLong = description + ` (Version: ${version}, Defaults: temperature=${temperature}, topP=${topP}, topK=${topK}, interfaces=[${supportedGenerationMethods.join(',')}])`;
@@ -168,7 +171,7 @@ export const llmGeminiRouter = createTRPCRouter({
 
           return {
             id: name,
-            label: displayName,
+            label: isSymlink ? `🔗 ${displayName.replace('1.0', '')} → ${symlinked ? symlinked.name : '?'}` : displayName,
             // created: ...
             // updated: ...
             description: descriptionLong,

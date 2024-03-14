@@ -11,9 +11,9 @@ import { getCallbackUrl } from '~/common/app.routes';
 import { DModelSourceId } from '../../store-llms';
 import { useLlmUpdateModels } from '../useLlmUpdateModels';
 import { useSourceSetup } from '../useSourceSetup';
-import { FormSwitchControl } from '~/common/components/forms/FormSwitchControl';
 
 import { isValidOpenRouterKey, ModelVendorOpenRouter } from './openrouter.vendor';
+import { FormSwitchControl } from '~/common/components/forms/FormSwitchControl';
 
 
 export function OpenRouterSourceSetup(props: { sourceId: DModelSourceId }) {
@@ -32,7 +32,7 @@ export function OpenRouterSourceSetup(props: { sourceId: DModelSourceId }) {
 
   // fetch models
   const { isFetching, refetch, isError, error } =
-    useLlmUpdateModels(ModelVendorOpenRouter, access, !sourceHasLLMs && shallFetchSucceed, source);
+    useLlmUpdateModels(ModelVendorOpenRouter, access, !sourceHasLLMs && shallFetchSucceed, source, true);
 
 
   const handleOpenRouterLogin = () => {

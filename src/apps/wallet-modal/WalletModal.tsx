@@ -7,7 +7,7 @@ import { useOptimaLayout } from '~/common/layout/optima/useOptimaLayout';
 import { sendRequest } from 'config/action';
 import { useFirebaseStore } from 'config/store-firebase';
 import { useWalletStore } from 'config/store-wallet';
-import { RenderCodeMemo } from '../chat/components/message/blocks/code/RenderCode';
+import { RenderCodeMemo } from '../../modules/blocks/code/RenderCode';
 import WalletIcon from '@mui/icons-material/Wallet';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import { addSnackbar } from '~/common/components/useSnackbarsStore';

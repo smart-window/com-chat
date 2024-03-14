@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { shallow } from 'zustand/shallow';
 import { fileOpen, FileWithHandle } from 'browser-fs-access';
-import { keyframes } from '@emotion/react';
 
 import { Box, Button, ButtonGroup, Card, Dropdown, Grid, IconButton, Menu, MenuButton, MenuItem, Textarea, Tooltip, Typography } from '@mui/joy';
 import { ColorPaletteProp, SxProps, VariantProp } from '@mui/joy/styles/types';
@@ -23,12 +22,14 @@ import type { DLLM } from '~/modules/llms/store-llms';
 import type { LLMOptionsOpenAI } from '~/modules/llms/vendors/openai/openai.vendor';
 import { useBrowseCapability } from '~/modules/browse/store-module-browsing';
 
+import { ChatBeamIcon } from '~/common/components/icons/ChatBeamIcon';
 import { DConversationId, useChatStore } from '~/common/state/store-chats';
 import { PreferencesTab, useOptimaLayout } from '~/common/layout/optima/useOptimaLayout';
 import { SpeechResult, useSpeechRecognition } from '~/common/components/useSpeechRecognition';
+import { animationEnterBelow } from '~/common/util/animUtils';
 import { countModelTokens } from '~/common/util/token-counter';
 import { launchAppCall } from '~/common/app.routes';
-import { lineHeightTextarea } from '~/common/app.theme';
+import { lineHeightTextareaMd } from '~/common/app.theme';
 import { playSoundUrl } from '~/common/util/audioUtils';
 import { supportsClipboardRead } from '~/common/util/clipboardUtils';
 import { supportsScreenCapture } from '~/common/util/screenCaptureUtils';
@@ -51,10 +52,10 @@ import { ButtonAttachCameraMemo, useCameraCaptureModal } from './buttons/ButtonA
 import { ButtonAttachClipboardMemo } from './buttons/ButtonAttachClipboard';
 import { ButtonAttachFileMemo } from './buttons/ButtonAttachFile';
 import { ButtonAttachScreenCaptureMemo } from './buttons/ButtonAttachScreenCapture';
-import { ButtonCall } from './buttons/ButtonCall';
+import { ButtonCallMemo } from './buttons/ButtonCall';
 import { ButtonMicContinuationMemo } from './buttons/ButtonMicContinuation';
 import { ButtonMicMemo } from './buttons/ButtonMic';
-import { ButtonMultiChat } from './buttons/ButtonMultiChat';
+import { ButtonMultiChatMemo } from './buttons/ButtonMultiChat';
 import { ButtonOptionsDraw } from './buttons/ButtonOptionsDraw';
 import { ChatModeMenu } from './ChatModeMenu';
 import { TokenBadgeMemo } from './TokenBadge';
@@ -62,16 +63,23 @@ import { TokenProgressbarMemo } from './TokenProgressbar';
 import { useComposerStartupText } from './store-composer';
 
 
-export const animationStopEnter = keyframes`
-    from {
-        opacity: 0;
-        transform: translateY(8px)
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0)
-    }
-`;
+const zIndexComposerOverlayDrop = 10;
+const zIndexComposerOverlayMic = 20;
+
+const dropperCardSx: SxProps = {
+  display: 'none',
+  position: 'absolute', bottom: 0, left: 0, right: 0, top: 0,
+  alignItems: 'center', justifyContent: 'center', gap: 2,
+  border: '2px dashed',
+  borderRadius: 'xs',
+  boxShadow: 'none',
+  zIndex: zIndexComposerOverlayDrop,
+} as const;
+
+const dropppedCardDraggingSx: SxProps = {
+  ...dropperCardSx,
+  display: 'flex',
+} as const;
 
 
 /**
@@ -180,36 +188,47 @@ export function Composer(props: {
     return enqueued;
   }, [clearAttachments, conversationId, llmAttachments, onAction, setComposeText]);
 
-  const handleSendClicked = () => handleSendAction(chatModeId, composeText);
+  const handleSendClicked = React.useCallback(() => {
+    handleSendAction(chatModeId, composeText);
+  }, [chatModeId, composeText, handleSendAction]);
 
-  const handleStopClicked = () => props.conversationId && stopTyping(props.conversationId);
+  const handleStopClicked = React.useCallback(() => {
+    !!props.conversationId && stopTyping(props.conversationId);
+  }, [props.conversationId, stopTyping]);
 
 
   // Secondary buttons
 
-  const handleCallClicked = () => props.conversationId && systemPurposeId && launchAppCall(props.conversationId, systemPurposeId);
+  const handleCallClicked = React.useCallback(() => {
+    props.conversationId && systemPurposeId && launchAppCall(props.conversationId, systemPurposeId);
+  }, [props.conversationId, systemPurposeId]);
 
-  const handleDrawOptionsClicked = () => openPreferencesTab(PreferencesTab.Draw);
+  const handleDrawOptionsClicked = React.useCallback(() => {
+    openPreferencesTab(PreferencesTab.Draw);
+  }, [openPreferencesTab]);
 
-  const handleTextImagineClicked = () => {
+  const handleTextImagineClicked = React.useCallback(() => {
     if (!composeText || !props.conversationId)
       return;
     props.onTextImagine(props.conversationId, composeText);
     setComposeText('');
-  };
+  }, [composeText, props, setComposeText]);
 
 
   // Mode menu
 
-  const handleModeSelectorHide = () => setChatModeMenuAnchor(null);
+  const handleModeSelectorHide = React.useCallback(() => {
+    setChatModeMenuAnchor(null);
+  }, []);
 
-  const handleModeSelectorShow = (event: React.MouseEvent<HTMLAnchorElement>) =>
+  const handleModeSelectorShow = React.useCallback((event: React.MouseEvent<HTMLAnchorElement>) => {
     setChatModeMenuAnchor(anchor => anchor ? null : event.currentTarget);
+  }, []);
 
-  const handleModeChange = (_chatModeId: ChatModeId) => {
+  const handleModeChange = React.useCallback((_chatModeId: ChatModeId) => {
     handleModeSelectorHide();
     setChatModeId(_chatModeId);
-  };
+  }, [handleModeSelectorHide]);
 
 
   // Actiles
@@ -331,7 +350,9 @@ export function Composer(props: {
     toggleRecording();
   }, [micContinuation, micIsRunning, toggleRecording]);
 
-  const handleToggleMicContinuation = () => setMicContinuation(continued => !continued);
+  const handleToggleMicContinuation = React.useCallback(() => {
+    setMicContinuation(continued => !continued);
+  }, []);
 
   React.useEffect(() => {
     // autostart the microphone if the assistant stopped typing
@@ -435,24 +456,42 @@ export function Composer(props: {
 
 
   const isText = chatModeId === 'generate-text';
+  const isTextBeam = chatModeId === 'generate-text-beam';
   const isAppend = chatModeId === 'append-user';
-  const isChat = isText || isAppend;
   const isReAct = chatModeId === 'generate-react';
   const isDraw = chatModeId === 'generate-image';
-  const buttonColor: ColorPaletteProp = assistantAbortible
-    ? 'warning'
-    : isReAct ? 'success' : isDraw ? 'warning' : 'primary';
+
+  const showCall = isText || isAppend;
+
+  const buttonColor: ColorPaletteProp =
+    assistantAbortible ? 'warning'
+      : isReAct ? 'success'
+        : isTextBeam ? 'success'
+          : isDraw ? 'warning'
+            : 'primary';
+
+  const buttonText =
+    isAppend ? 'Write'
+      : isReAct ? 'ReAct'
+        : isTextBeam ? 'Beam'
+          : isDraw ? 'Draw'
+            : 'Chat';
+
+  const buttonIcon =
+    micContinuation ? <AutoModeIcon />
+      : isAppend ? <SendIcon sx={{ fontSize: 18 }} />
+        : isReAct ? <PsychologyIcon />
+          : isTextBeam ? <ChatBeamIcon /> /* <GavelIcon /> */
+            : isDraw ? <FormatPaintIcon />
+              : <TelegramIcon />;
 
   let textPlaceholder: string =
-    isDraw
-      ? 'Describe an idea or a drawing...'
-      : isReAct
-        ? 'Multi-step reasoning question...'
-        : props.isDeveloperMode
-          ? 'Chat with me' + (isDesktop ? ' · drop source' : '') + ' · attach code...'
-          : props.capabilityHasT2I
-            ? 'Chat · /react · /draw · drop files...'
-            : 'Chat · /react · drop files...';
+    isDraw ? 'Describe an idea or a drawing...'
+      : isReAct ? 'Multi-step reasoning question...'
+        : isTextBeam ? 'Multi-chat with this persona...'
+          : props.isDeveloperMode ? 'Chat with me' + (isDesktop ? ' · drop source' : '') + ' · attach code...'
+            : props.capabilityHasT2I ? 'Chat · /react · /draw · drop files...'
+              : 'Chat · /react · drop files...';
   if (isDesktop && explainShiftEnter)
     textPlaceholder += !enterIsNewline ? '\nShift+Enter to add a new line' : '\nShift+Enter to send';
 
@@ -496,7 +535,7 @@ export function Composer(props: {
               </Dropdown>
 
               {/* [Mobile] MultiChat button */}
-              {props.isMulticast !== null && <ButtonMultiChat isMobile multiChat={props.isMulticast} onSetMultiChat={props.setIsMulticast} />}
+              {props.isMulticast !== null && <ButtonMultiChatMemo isMobile multiChat={props.isMulticast} onSetMultiChat={props.setIsMulticast} />}
 
             </> : <>
 
@@ -561,7 +600,7 @@ export function Composer(props: {
                   sx={{
                     backgroundColor: 'background.level1',
                     '&:focus-within': { backgroundColor: 'background.popup' },
-                    lineHeight: lineHeightTextarea,
+                    lineHeight: lineHeightTextareaMd,
                   }} />
 
                 {tokenLimit > 0 && (tokensComposer > 0 || (tokensHistory + tokensReponseMax) > 0) && (
@@ -578,7 +617,7 @@ export function Composer(props: {
               {isSpeechEnabled && (
                 <Box sx={{
                   position: 'absolute', top: 0, right: 0,
-                  zIndex: 21,
+                  zIndex: zIndexComposerOverlayMic + 1,
                   mt: isDesktop ? 1 : 0.25,
                   mr: isDesktop ? 1 : 0.25,
                   display: 'flex', flexDirection: 'column', gap: isDesktop ? 1 : 0.25,
@@ -605,7 +644,7 @@ export function Composer(props: {
                     border: '1px solid',
                     borderColor: 'primary.solidBg',
                     borderRadius: 'sm',
-                    zIndex: 20,
+                    zIndex: zIndexComposerOverlayMic,
                     px: 1.5, py: 1,
                   }}>
                   <Typography>
@@ -618,16 +657,8 @@ export function Composer(props: {
               {/* overlay: Drag & Drop*/}
               {!isMobile && (
                 <Card
-                  color='success' variant='soft' invertedColors
-                  sx={{
-                    display: isDragging ? 'flex' : 'none',
-                    position: 'absolute', bottom: 0, left: 0, right: 0, top: 0,
-                    alignItems: 'center', justifyContent: 'center', gap: 2,
-                    border: '2px dashed',
-                    borderRadius: 'xs',
-                    boxShadow: 'none',
-                    zIndex: 10,
-                  }}
+                  color={isDragging ? 'success' : undefined} variant={isDragging ? 'soft' : undefined} invertedColors={isDragging}
+                  sx={isDragging ? dropppedCardDraggingSx : dropperCardSx}
                   onDragLeave={handleOverlayDragLeave}
                   onDragOver={handleOverlayDragOver}
                   onDrop={handleOverlayDrop}
@@ -655,14 +686,14 @@ export function Composer(props: {
 
 
         <Grid xs={12} md={3}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, height: '100%' }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, height: '100%' } as const}>
 
             {/* This row is here only for the [mobile] bottom-start corner item */}
             <Box sx={{ display: 'flex' }}>
 
               {/* [mobile] bottom-corner secondary button */}
-              {isMobile && (isChat
-                  ? <ButtonCall isMobile disabled={!props.conversationId || !chatLLMId} onClick={handleCallClicked} sx={{ mr: { xs: 1, md: 2 } }} />
+              {isMobile && (showCall
+                  ? <ButtonCallMemo isMobile disabled={!props.conversationId || !chatLLMId} onClick={handleCallClicked} />
                   : isDraw
                     ? <ButtonOptionsDraw isMobile onClick={handleDrawOptionsClicked} sx={{ mr: { xs: 1, md: 2 } }} />
                     : <IconButton disabled sx={{ mr: { xs: 1, md: 2 } }} />
@@ -682,16 +713,10 @@ export function Composer(props: {
                     key='composer-act'
                     fullWidth disabled={!props.conversationId || !chatLLMId || !llmAttachments.isOutputAttacheable}
                     onClick={handleSendClicked}
-                    endDecorator={
-                      micContinuation ? <AutoModeIcon /> :
-                        isAppend ? <SendIcon sx={{ fontSize: 18 }} /> :
-                          isReAct ? <PsychologyIcon /> :
-                            isDraw ? <FormatPaintIcon />
-                              : <TelegramIcon />
-                    }
+                    endDecorator={buttonIcon}
+                    sx={{ '--Button-gap': '1rem' }}
                   >
-                    {micContinuation && 'Voice '}
-                    {isAppend ? 'Write' : isReAct ? 'ReAct' : isDraw ? 'Draw' : 'Chat'}
+                    {micContinuation && 'Voice '}{buttonText}
                   </Button>
                 ) : (
                   <Button
@@ -699,7 +724,7 @@ export function Composer(props: {
                     fullWidth variant='soft' disabled={!props.conversationId}
                     onClick={handleStopClicked}
                     endDecorator={<StopOutlinedIcon sx={{ fontSize: 18 }} />}
-                    sx={{ animation: `${animationStopEnter} 0.1s ease-out` }}
+                    sx={{ animation: `${animationEnterBelow} 0.1s ease-out` }}
                   >
                     Stop
                   </Button>
@@ -725,13 +750,13 @@ export function Composer(props: {
             </Box>
 
             {/* [desktop] Multicast switch (under the Chat button) */}
-            {isDesktop && props.isMulticast !== null && <ButtonMultiChat multiChat={props.isMulticast} onSetMultiChat={props.setIsMulticast} />}
+            {isDesktop && props.isMulticast !== null && <ButtonMultiChatMemo multiChat={props.isMulticast} onSetMultiChat={props.setIsMulticast} />}
 
             {/* [desktop] secondary buttons (aligned to bottom for now, and mutually exclusive) */}
             {isDesktop && <Box sx={{ mt: 'auto', display: 'grid', gap: 1 }}>
 
               {/* [desktop] Call secondary button */}
-              {isChat && <ButtonCall disabled={!props.conversationId || !chatLLMId} onClick={handleCallClicked} />}
+              {showCall && <ButtonCallMemo disabled={!props.conversationId || !chatLLMId} onClick={handleCallClicked} />}
 
               {/* [desktop] Draw Options secondary button */}
               {isDraw && <ButtonOptionsDraw onClick={handleDrawOptionsClicked} />}

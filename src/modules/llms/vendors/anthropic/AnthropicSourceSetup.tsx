@@ -39,6 +39,12 @@ export function AnthropicSourceSetup(props: { sourceId: DModelSourceId }) {
 
   return <>
 
+    <Alert variant='soft' color='success'>
+      <div>
+        Note: <strong>Claude-3</strong> models are now supported.
+      </div>
+    </Alert>
+
     <FormInputKey
       id='anthropic-key' label={!!anthropicHost ? 'API Key' : 'Anthropic API Key'}
       rightLabel={<>{needsUserKey
@@ -77,4 +83,5 @@ export function AnthropicSourceSetup(props: { sourceId: DModelSourceId }) {
     {isError && <InlineError error={error} />}
 
   </>;
+  ;
 }

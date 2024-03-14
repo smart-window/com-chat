@@ -7,7 +7,6 @@ import MenuIcon from '@mui/icons-material/Menu';
 
 import { useModelsStore } from '~/modules/llms/store-llms';
 
-import { AgiSquircleIcon } from '~/common/components/icons/AgiSquircleIcon';
 import { checkDivider, checkVisibileIcon, NavItemApp, navItems } from '~/common/app.nav';
 import { themeZIndexDesktopNav } from '~/common/app.theme';
 
@@ -60,11 +59,11 @@ export function DesktopNav(props: { component: React.ElementType, currentApp?: N
           return <Divider key={'div-' + appIdx} sx={{ my: 1, width: '50%', mx: 'auto' }} />;
 
         return (
-          <Tooltip key={'n-m-' + app.route.slice(1)} disableInteractive enterDelay={600} title={app.name}>
+          <Tooltip key={'n-m-' + app.route.slice(1)} disableInteractive enterDelay={600} title={app.name + (app.isDev ? ' [DEV]' : '')}>
             <DesktopNavIcon
               variant={isActive ? 'solid' : undefined}
               onClick={isDrawerable ? toggleDrawer : () => Router.push(app.landingRoute || app.route)}
-              className={`${navItemClasses.typeApp} ${isActive ? navItemClasses.active : ''} ${isPaneOpen ? navItemClasses.paneOpen : ''}`}
+              className={`${navItemClasses.typeApp} ${isActive ? navItemClasses.active : ''} ${isPaneOpen ? navItemClasses.paneOpen : ''} ${app.isDev ? navItemClasses.dev : ''}`}
             >
               {/*{(isActive && app.iconActive) ? <app.iconActive /> : <app.icon />}*/}
               <app.icon />
@@ -122,7 +121,7 @@ export function DesktopNav(props: { component: React.ElementType, currentApp?: N
         </Tooltip>
       );
     });
-  }, [noLLMs, openModelsSetup, openPreferencesTab, openWallet, showModelsSetup, showPreferencesTab, showWallet, showAPI]);
+  }, [noLLMs, openModelsSetup, openPreferencesTab, openWallet, openAPI, showModelsSetup, showPreferencesTab, showWallet, showAPI]);
 
 
   return (

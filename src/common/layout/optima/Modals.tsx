@@ -29,7 +29,7 @@ export function Modals(props: { suspendAutoModelsSetup?: boolean }) {
 
     {/* Overlay API */}
     <APIModal />
-
+    
     {/* Overlay Shortcuts */}
     {showShortcuts && <ShortcutsModal onClose={closeShortcuts} />}
 

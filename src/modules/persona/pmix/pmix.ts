@@ -3,6 +3,7 @@ import { DLLMId, getKnowledgeMapCutoff } from '~/modules/llms/store-llms';
 /*type Variables =
   | '{{Today}}'
   | '{{Cutoff}}'
+  | '{{PreferTables}}'
   | '{{RenderMermaid}}'
   | '{{RenderPlantUML}}'
   | '{{RenderSVG}}'
@@ -22,6 +23,7 @@ const variableResolvers: { [key in Variables]: (context: VariableResolverContext
     return getKnowledgeMapCutoff(context.assistantLlmId) || '';
   },
 
+  '{{PreferTables}}': () => 'Data presentation: prefer tables (auto-columns)',
   '{{RenderMermaid}}': () => 'Mermaid rendering: Enabled',
   '{{RenderPlantUML}}': () => 'PlantUML rendering: Enabled',
   '{{RenderSVG}}': () => 'SVG rendering: Enabled',
@@ -43,6 +45,28 @@ export function bareBonesPromptMixer(_template: string, assistantLlmId: DLLMId |
   const today = new Date();
   const varToday = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
   mixed = mixed.replaceAll('{{Today}}', varToday);
+
+  // {{LocaleNow}} - enough information to get on the same page with the user
+  if (mixed.includes('{{LocaleNow}}')) {
+    const userLocale = navigator.language || 'en-US';
+    // const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+    // Format the current date and time according to the user's locale and timezone
+    const formatter = new Intl.DateTimeFormat(userLocale, {
+      weekday: 'short', // Full name of the day of the week
+      year: 'numeric', // Numeric year
+      month: 'short', // Full name of the month
+      day: 'numeric', // Numeric day of the month
+      hour: '2-digit', // 2-digit hour
+      minute: '2-digit', // 2-digit minute
+      timeZoneName: 'short', // Short timezone name (e.g., GMT, CST)
+      hour12: true, // Use 12-hour time format; set to false for 24-hour format if preferred
+    });
+    const formattedDateTime = formatter.format(new Date());
+    mixed = mixed.replaceAll('{{LocaleNow}}', formattedDateTime /*`${formattedDateTime} (${userTimezone})`*/);
+  }
+
+  // {{Prefer...}}
+  mixed = mixed.replace('{{PreferTables}}', 'Data presentation: prefer tables (auto-columns)');
 
   // {{Render...}}
   mixed = mixed.replace('{{RenderMermaid}}', 'Mermaid rendering: Enabled');

@@ -10,7 +10,6 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import SettingsIcon from '@mui/icons-material/Settings';
 
 import { checkVisibleNav, NavItemApp } from '~/common/app.nav';
-import { AgiSquircleIcon } from '~/common/components/icons/AgiSquircleIcon';
 import { Brand } from '~/common/app.config';
 import { CloseableMenu } from '~/common/components/CloseableMenu';
 import { Link } from '~/common/components/Link';
@@ -149,6 +148,9 @@ export function PageBar(props: { component: React.ElementType, currentApp?: NavI
         display: 'flex', flexFlow: 'row wrap', justifyContent: 'center', alignItems: 'center',
         my: 'auto',
         gap: props.isMobile ? 0 : 1,
+        // [electron] make the blank part of the bar draggable (and not the contents)
+        WebkitAppRegion: 'drag',
+        '& > *': { WebkitAppRegion: 'no-drag' },
       }}>
         {appBarItems
           ? appBarItems

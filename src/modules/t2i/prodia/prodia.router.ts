@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 import { createTRPCRouter, publicProcedure } from '~/server/api/trpc.server';
 import { env } from '~/server/env.mjs';
-import { fetchJsonOrTRPCError } from '~/server/api/trpc.serverutils';
+import { fetchJsonOrTRPCError } from '~/server/api/trpc.router.fetchers';
 
 import { t2iCreateImagesOutputSchema } from '../t2i.server.types';
 
@@ -194,7 +194,7 @@ function prodiaAccess(_prodiaKey: string | undefined, apiPath: string): { header
   // API key
   const prodiaKey = (_prodiaKey || env.PRODIA_API_KEY || '').trim();
   if (!prodiaKey)
-    throw new Error('Missing Prodia API Key. Add it on the UI (Setup) or server side (your deployment).');
+    throw new Error('Missing Prodia API Key. Add it on the UI (Setup) or use default system api key.');
 
   // API host
   const prodiaHost = 'https://api.prodia.com';

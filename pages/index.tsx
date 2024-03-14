@@ -1,16 +1,12 @@
 import { useEffect, useState } from 'react';
 import firebase from '../config/firebase';
 
-import { useRedirectToNewsOnUpdates } from '../src/apps/news/news.hooks';
-
 import SignInPage from './signin';
 import ChatPage from './chat';
 
 import { useFirebaseStore } from '../config/store-firebase';
 
 export default function IndexPage() {
-  // show the News page if there are unseen updates
-  useRedirectToNewsOnUpdates();
 
   const [isSignedIn, setIsSignedIn] = useState(false); // Local signed-in state.
   const { setIdToken } = useFirebaseStore()

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Enrico Ros
+ * Copyright (c) 2024 Smart Dev
  *
  * Functions to deal with HTML5Video elements.
  */

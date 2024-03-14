@@ -7,7 +7,7 @@ import { useOptimaLayout } from '~/common/layout/optima/useOptimaLayout';
 import { sendRequest } from 'config/action';
 import { useFirebaseStore } from 'config/store-firebase';
 import { useAPIStore } from 'config/store-api';
-import { RenderCodeMemo } from '../chat/components/message/blocks/code/RenderCode';
+import { RenderCodeMemo } from '../../modules/blocks/code/RenderCode';
 import { useWalletStore } from 'config/store-wallet';
 
 export function APIModal() {

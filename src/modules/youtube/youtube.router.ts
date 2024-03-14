@@ -1,4 +1,4 @@
-// Copyright (c) 2023-2024 Enrico Ros
+// Copyright (c) 2023-2024 Smart Dev
 // This subsystem is responsible for fetching the transcript of a YouTube video.
 // It is used by the com-chat Persona Creator to create a character sheet.
 
@@ -6,7 +6,7 @@ import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 
 import { createTRPCRouter, publicProcedure } from '~/server/api/trpc.server';
-import { fetchJsonOrTRPCError, fetchTextOrTRPCError } from '~/server/api/trpc.serverutils';
+import { fetchJsonOrTRPCError, fetchTextOrTRPCError } from '~/server/api/trpc.router.fetchers';
 
 
 const inputSchema = z.object({
