@@ -36,17 +36,6 @@ export function MistralSourceSetup(props: { sourceId: DModelSourceId }) {
 
   return <>
 
-    <FormInputKey
-      id='mistral-key' label='Mistral Key'
-      rightLabel={<>{needsUserKey
-        ? !mistralKey && <Link level='body-sm' href={MISTRAL_REG_LINK} target='_blank'>request Key</Link>
-        : '✔️ already set in server'}
-      </>}
-      value={mistralKey} onChange={value => updateSetup({ oaiKey: value })}
-      required={needsUserKey} isError={showKeyError}
-      placeholder='...'
-    />
-
     <Typography level='body-sm'>
       In order of capabilities we have Large, Medium, Small (Open 8x7B = Small 2312) and Tiny (Open 7B = Tiny 2312) models.
       Note the elegance of the numbers, representing the Year and Month or release (YYMM).

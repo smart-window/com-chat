@@ -42,6 +42,7 @@ export const ModelVendorPerplexity: IModelVendor<SourceSetupPerplexity, OpenAIAc
     oaiHost: '',
     heliKey: '',
     moderationCheck: false,
+    defaultCheck: false,
   }),
 
   // OpenAI transport ('perplexity' dialect in 'access')

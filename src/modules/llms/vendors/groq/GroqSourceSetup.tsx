@@ -39,17 +39,6 @@ export function GroqSourceSetup(props: { sourceId: DModelSourceId }) {
 
   return <>
 
-    <FormInputKey
-      id='groq-key' label='Groq API Key'
-      rightLabel={<>{needsUserKey
-        ? !groqKey && <Link level='body-sm' href={GROQ_REG_LINK} target='_blank'>API keys</Link>
-        : '✔️ already set in server'}
-      </>}
-      value={groqKey} onChange={value => updateSetup({ groqKey: value })}
-      required={needsUserKey} isError={showKeyError}
-      placeholder='...'
-    />
-
     <Typography level='body-sm'>
       <Link href='https://console.groq.com/docs/quickstart'>Groq</Link> offers inference
       as a service for a variety of models. See the <Link href='https://www.groq.com/' target='_blank'>Groq</Link> website for more information.

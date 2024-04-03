@@ -47,17 +47,6 @@ export function GeminiSourceSetup(props: { sourceId: DModelSourceId }) {
 
   return <>
 
-    <FormInputKey
-      id='gemini-key' label='Gemini API Key'
-      rightLabel={<>{needsUserKey
-        ? !geminiKey && <Link level='body-sm' href={GEMINI_API_KEY_LINK} target='_blank'>request Key</Link>
-        : '✔️ already set in server'}
-      </>}
-      value={geminiKey} onChange={value => updateSetup({ geminiKey: value.trim() })}
-      required={needsUserKey} isError={showKeyError}
-      placeholder='...'
-    />
-
     <FormControl orientation='horizontal' sx={{ justifyContent: 'space-between', alignItems: 'center' }}>
       <FormLabelStart title='Safety Settings'
                       description='Threshold' />

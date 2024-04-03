@@ -54,37 +54,9 @@ export function OpenRouterSourceSetup(props: { sourceId: DModelSourceId }) {
         Configuration &amp; documentation</Link>.
     </Typography>
 
-    <FormSwitchControl
-      title='Use Default' on='Enabled' off="Disabled"
-      description={<> {defaultCheck ? "You will use default system api key to use Open Router Models." : "You will use your own Open Router API Key."} </>}
-      checked={defaultCheck}
-      onChange={on => updateSetup({ defaultCheck: on })}
-    />
-
-    {!defaultCheck && <>
-
-      <FormInputKey
-        id='openrouter-key' label='OpenRouter API Key'
-        rightLabel={<>{needsUserKey
-          ? !oaiKey && <Link level='body-sm' href='https://openrouter.ai/keys' target='_blank'>your keys</Link>
-          : '✔️ already set in server'
-        } {oaiKey && keyValid && <Link level='body-sm' href='https://openrouter.ai/activity' target='_blank'>check usage</Link>}
-        </>}
-        value={oaiKey} onChange={value => updateSetup({ oaiKey: value })}
-        required={needsUserKey} isError={keyError}
-        placeholder='sk-or-...'
-      />
-
-      <Typography level='body-sm'>
-        🎁 A selection of <Link href='https://openrouter.ai/docs#models' target='_blank'>OpenRouter models</Link> are
-        made available without charge. You can get an API key by using the Login button below.
-      </Typography>
-
-    </>}
-
     <SetupFormRefetchButton
       refetch={refetch} disabled={!shallFetchSucceed || isFetching} loading={isFetching} error={isError}
-      leftButton={!defaultCheck &&
+      leftButton={
         <Button
           color='neutral' variant={(needsUserKey && !keyValid) ? 'solid' : 'outlined'}
           onClick={handleOpenRouterLogin}

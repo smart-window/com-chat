@@ -45,17 +45,6 @@ export function TogetherAISourceSetup(props: { sourceId: DModelSourceId }) {
 
   return <>
 
-    <FormInputKey
-      id='togetherai-key' label='Together AI Key'
-      rightLabel={<>{needsUserKey
-        ? !togetherKey && <Link level='body-sm' href={TOGETHERAI_REG_LINK} target='_blank'>request Key</Link>
-        : '✔️ already set in server'}
-      </>}
-      value={togetherKey} onChange={value => updateSetup({ togetherKey: value })}
-      required={needsUserKey} isError={showKeyError}
-      placeholder='...'
-    />
-
     <Typography level='body-sm'>
       The Together Inference platform allows you to run recent machine learning models with good speed and low
       cost. See the <Link href='https://www.together.ai/' target='_blank'>Together AI</Link> website for more

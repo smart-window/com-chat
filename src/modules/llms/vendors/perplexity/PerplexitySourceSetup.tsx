@@ -39,16 +39,6 @@ export function PerplexitySourceSetup(props: { sourceId: DModelSourceId }) {
 
   return <>
 
-    <FormInputKey
-      id='perplexity-key' label='Perplexity API Key'
-      rightLabel={<>{needsUserKey
-        ? !perplexityKey && <Link level='body-sm' href={PERPLEXITY_REG_LINK} target='_blank'>API keys</Link>
-        : '✔️ already set in server'}
-      </>}
-      value={perplexityKey} onChange={value => updateSetup({ perplexityKey: value })}
-      required={needsUserKey} isError={showKeyError}
-      placeholder='...'
-    />
 
     <Typography level='body-sm'>
       The <Link href='https://docs.perplexity.ai/docs/getting-started'>Perplexity API</Link> offers inference
