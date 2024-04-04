@@ -37,7 +37,7 @@ export function anthropicAccess(access: AnthropicAccessSchema, apiPath: string):
 
   // break for the missing key only on the default host
   if (!anthropicKey && !(access.anthropicHost || env.ANTHROPIC_API_HOST))
-    throw new Error('Missing Anthropic API Key. Add it on the UI (Models Setup) or use default system api key.');
+    throw new Error('Missing Anthropic API Key. Add it on the UI (Models Setup) or server side (your deployment).');
 
   // API host
   let anthropicHost = fixupHost(access.anthropicHost || env.ANTHROPIC_API_HOST || DEFAULT_ANTHROPIC_HOST, apiPath);

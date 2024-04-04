@@ -1,4 +1,4 @@
-// Copyright (c) 2023-2024 Smart Dev
+// Copyright (c) 2023-2024 Smart
 // This subsystem is responsible for fetching the transcript of a YouTube video.
 // It is used by the com-chat Persona Creator to create a character sheet.
 

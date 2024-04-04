@@ -1,5 +1,3 @@
-import { backendCaps } from '~/modules/backend/state-backend';
-
 import { TogetherIcon } from '~/common/components/icons/vendors/TogetherIcon';
 
 import type { IModelVendor } from '../IModelVendor';
@@ -23,7 +21,7 @@ export const ModelVendorTogetherAI: IModelVendor<SourceSetupTogetherAI, OpenAIAc
   rank: 17,
   location: 'cloud',
   instanceLimit: 1,
-  hasBackendCap: () => backendCaps().hasLlmTogetherAI,
+  hasBackendCapKey: 'hasLlmTogetherAI',
 
   // components
   Icon: TogetherIcon,
@@ -46,7 +44,6 @@ export const ModelVendorTogetherAI: IModelVendor<SourceSetupTogetherAI, OpenAIAc
     oaiHost: partialSetup?.togetherHost || '',
     heliKey: '',
     moderationCheck: false,
-    defaultCheck: false,
   }),
 
   // there is delay for OpenRouter Free API calls
@@ -69,7 +66,7 @@ export const ModelVendorTogetherAI: IModelVendor<SourceSetupTogetherAI, OpenAIAc
 
 
   // OpenAI transport ('togetherai' dialect in 'access')
-  rpcUpdateModelsQuery: ModelVendorOpenAI.rpcUpdateModelsQuery,
+  rpcUpdateModelsOrThrow: ModelVendorOpenAI.rpcUpdateModelsOrThrow,
   rpcChatGenerateOrThrow: ModelVendorOpenAI.rpcChatGenerateOrThrow,
   streamingChatGenerateOrThrow: ModelVendorOpenAI.streamingChatGenerateOrThrow,
 };

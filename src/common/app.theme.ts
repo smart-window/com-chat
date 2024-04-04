@@ -14,7 +14,7 @@ export const formLabelStartWidth = 140;
 
 // Theme & Fonts
 
-const inter = Inter({
+const font = Inter({
   weight: [ /* '300', sm */ '400' /* (undefined, default) */, '500' /* md */, '600' /* lg */, '700' /* xl */],
   subsets: ['latin'],
   display: 'swap',
@@ -30,7 +30,8 @@ const jetBrainsMono = JetBrains_Mono({
 
 export const appTheme = extendTheme({
   fontFamily: {
-    body: inter.style.fontFamily,
+    body: font.style.fontFamily,
+    display: font.style.fontFamily,
     code: jetBrainsMono.style.fontFamily,
   },
   colorSchemes: {
@@ -103,6 +104,14 @@ export const appTheme = extendTheme({
       },
     },
 
+    // JoyMenuItem: {
+    //   styleOverrides: {
+    //     root: {
+    //       '--Icon-fontSize': '1rem', // smaller menu(s) icon - default is 1.25rem ('xl', 20px)
+    //     },
+    //   },
+    // },
+
     // JoyModal: {
     //   styleOverrides: {
     //     backdrop: {
@@ -137,6 +146,7 @@ export const themeBgAppChatComposer = 'background.surface';
 export const lineHeightChatTextMd = 1.75;
 export const lineHeightTextareaMd = 1.75;
 
+export const themeZIndexBeamView = 10;
 export const themeZIndexPageBar = 25;
 export const themeZIndexDesktopDrawer = 26;
 export const themeZIndexDesktopNav = 27;

@@ -9,13 +9,6 @@ buildType && console.log(`   🧠 com-chat: building for ${buildType}...\n`);
 /** @type {import('next').NextConfig} */
 let nextConfig = {
   reactStrictMode: false,
-  typescript: {
-    // !! WARN !!
-    // Dangerously allow production builds to successfully complete even if
-    // your project has type errors.
-    // !! WARN !!
-    ignoreBuildErrors: true,
-  },
 
   // [exports] https://nextjs.org/docs/advanced-features/static-html-export
   ...buildType && {

@@ -3,19 +3,21 @@ import { shallow } from 'zustand/shallow';
 
 import type { SxProps } from '@mui/joy/styles/types';
 import { Avatar, Box, CircularProgress, IconButton, ListDivider, ListItem, ListItemDecorator, MenuItem, Switch, Tooltip, Typography } from '@mui/joy';
-import AccountTreeIcon from '@mui/icons-material/AccountTree';
+import AccountTreeTwoToneIcon from '@mui/icons-material/AccountTreeTwoTone';
 import ClearIcon from '@mui/icons-material/Clear';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DifferenceIcon from '@mui/icons-material/Difference';
-import EditIcon from '@mui/icons-material/Edit';
+import EditRoundedIcon from '@mui/icons-material/EditRounded';
 import Face6Icon from '@mui/icons-material/Face6';
 import ForkRightIcon from '@mui/icons-material/ForkRight';
-import FormatPaintIcon from '@mui/icons-material/FormatPaint';
+import FormatPaintTwoToneIcon from '@mui/icons-material/FormatPaintTwoTone';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import RecordVoiceOverIcon from '@mui/icons-material/RecordVoiceOver';
+import RecordVoiceOverTwoToneIcon from '@mui/icons-material/RecordVoiceOverTwoTone';
 import ReplayIcon from '@mui/icons-material/Replay';
 import SettingsSuggestIcon from '@mui/icons-material/SettingsSuggest';
 import SmartToyOutlinedIcon from '@mui/icons-material/SmartToyOutlined';
+import StarOutlineRoundedIcon from '@mui/icons-material/StarOutlineRounded';
+import StarRoundedIcon from '@mui/icons-material/StarRounded';
 import TelegramIcon from '@mui/icons-material/Telegram';
 import VerticalAlignBottomIcon from '@mui/icons-material/VerticalAlignBottom';
 
@@ -26,7 +28,7 @@ import { useSanityTextDiffs } from '~/modules/blocks/RenderTextDiff';
 
 import { ChatBeamIcon } from '~/common/components/icons/ChatBeamIcon';
 import { CloseableMenu } from '~/common/components/CloseableMenu';
-import { DMessage } from '~/common/state/store-chats';
+import { DMessage, DMessageUserFlag, messageHasUserFlag } from '~/common/state/store-chats';
 import { InlineTextarea } from '~/common/components/InlineTextarea';
 import { KeyStroke } from '~/common/components/KeyStroke';
 import { Link } from '~/common/components/Link';
@@ -60,7 +62,26 @@ export function messageBackground(messageRole: DMessage['role'] | string, wasEdi
   }
 }
 
-const avatarIconSx = { width: 36, height: 36 };
+const avatarIconSx = {
+  width: 36,
+  height: 36,
+};
+
+const personaSx: SxProps = {
+  // make this stick to the top of the screen
+  position: 'sticky',
+  top: 0,
+
+  // flexBasis: 0, // this won't let the item grow
+  minWidth: { xs: 50, md: 64 },
+  maxWidth: 80,
+  textAlign: 'center',
+  // layout
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+};
+
 
 export function makeAvatar(messageAvatar: string | null, messageRole: DMessage['role'] | string, messageOriginLLM: string | undefined, messagePurposeId: SystemPurposeId | undefined, messageSender: string, messageTyping: boolean, size: 'sm' | undefined = undefined): React.JSX.Element {
   if (typeof messageAvatar === 'string' && messageAvatar)
@@ -76,6 +97,7 @@ export function makeAvatar(messageAvatar: string | null, messageRole: DMessage['
 
     case 'assistant':
       // typing gif (people seem to love this, so keeping it after april fools')
+      const isDownload = messageOriginLLM === 'web';
       const isTextToImage = messageOriginLLM === 'DALL·E' || messageOriginLLM === 'Prodia';
       const isReact = messageOriginLLM?.startsWith('react-');
 
@@ -83,15 +105,16 @@ export function makeAvatar(messageAvatar: string | null, messageRole: DMessage['
       if (messageTyping)
         return <Avatar
           alt={messageSender} variant='plain'
-          src={isTextToImage ? 'https://i.giphy.com/media/5t9ujj9cMisyVjUZ0m/giphy.webp' // brush
-            : isReact ? 'https://i.giphy.com/media/l44QzsOLXxcrigdgI/giphy.webp' // mind
-              : 'https://i.giphy.com/media/jJxaUysjzO9ri/giphy.webp'} // typing
+          src={isDownload ? 'https://i.giphy.com/26u6dIwIphLj8h10A.webp' // hourglass: https://i.giphy.com/TFSxpAIYz5inJGuY8f.webp, small-lq: https://i.giphy.com/131tNuGktpXGhy.webp, floppy: https://i.giphy.com/RxR1KghIie2iI.webp
+            : isTextToImage ? 'https://i.giphy.com/media/5t9ujj9cMisyVjUZ0m/giphy.webp' // brush
+              : isReact ? 'https://i.giphy.com/media/l44QzsOLXxcrigdgI/giphy.webp' // mind
+                : 'https://i.giphy.com/media/jJxaUysjzO9ri/giphy.webp'} // typing
           sx={{ ...mascotSx, borderRadius: 'sm' }}
         />;
 
       // icon: text-to-image
       if (isTextToImage)
-        return <FormatPaintIcon sx={{
+        return <FormatPaintTwoToneIcon sx={{
           ...avatarIconSx,
           animation: `${animationColorRainbow} 1s linear 2.66`,
         }} />;
@@ -195,13 +218,16 @@ export function ChatMessage(props: {
   isSpeaking?: boolean,
   showAvatar?: boolean, // auto if undefined
   showBlocksDate?: boolean,
+  showUnsafeHtml?: boolean,
   adjustContentScaling?: number,
   topDecorator?: React.ReactNode,
-  onConversationBranch?: (messageId: string) => void,
-  onConversationRestartFrom?: (messageId: string, offset: number, chatEffectBeam: boolean) => Promise<void>,
-  onConversationTruncate?: (messageId: string) => void,
+  onMessageAssistantFrom?: (messageId: string, offset: number) => Promise<void>,
+  onMessageBeam?: (messageId: string) => Promise<void>,
+  onMessageBranch?: (messageId: string) => void,
   onMessageDelete?: (messageId: string) => void,
   onMessageEdit?: (messageId: string, text: string) => void,
+  onMessageToggleUserFlag?: (messageId: string, flag: DMessageUserFlag) => void,
+  onMessageTruncate?: (messageId: string) => void,
   onTextDiagram?: (messageId: string, text: string) => Promise<void>
   onTextImagine?: (text: string) => Promise<void>
   onTextSpeak?: (text: string) => Promise<void>
@@ -216,7 +242,7 @@ export function ChatMessage(props: {
   const [isEditing, setIsEditing] = React.useState(false);
 
   // external state
-  const labsChatBeam = useUXLabsStore(state => state.labsChatBeam);
+  const labsBeam = useUXLabsStore(state => state.labsBeam);
   const { showAvatar, contentScaling, doubleClickToEdit, renderMarkdown } = useUIPreferencesStore(state => ({
     showAvatar: props.showAvatar !== undefined ? props.showAvatar : state.zenMode !== 'cleaner',
     contentScaling: adjustContentScaling(state.contentScaling, props.adjustContentScaling),
@@ -240,6 +266,8 @@ export function ChatMessage(props: {
     updated: messageUpdated,
   } = props.message;
 
+  const isUserStarred = messageHasUserFlag(props.message, 'starred');
+
   const fromAssistant = messageRole === 'assistant';
   const fromSystem = messageRole === 'system';
   const wasEdited = !!messageUpdated;
@@ -260,6 +288,8 @@ export function ChatMessage(props: {
 
   // Operations Menu
 
+  const { onMessageToggleUserFlag } = props;
+
   const closeOpsMenu = () => setOpsMenuAnchor(null);
 
   const handleOpsCopy = (e: React.MouseEvent) => {
@@ -276,23 +306,27 @@ export function ChatMessage(props: {
     closeOpsMenu();
   }, [isEditing, messageTyping]);
 
-  const handleOpsConversationBranch = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation(); // to try to not steal the focus from the banched conversation
-    props.onConversationBranch && props.onConversationBranch(messageId);
-    closeOpsMenu();
-  };
+  const handleOpsToggleStarred = React.useCallback(() => {
+    onMessageToggleUserFlag?.(messageId, 'starred');
+  }, [messageId, onMessageToggleUserFlag]);
 
-  const handleOpsConversationRestartFrom = async (e: React.MouseEvent) => {
+  const handleOpsAssistantFrom = async (e: React.MouseEvent) => {
     e.preventDefault();
     closeOpsMenu();
-    props.onConversationRestartFrom && await props.onConversationRestartFrom(messageId, fromAssistant ? -1 : 0, false);
+    await props.onMessageAssistantFrom?.(messageId, fromAssistant ? -1 : 0);
   };
 
-  const handleOpsConversationRestartFromBeam = async (e: React.MouseEvent) => {
+  const handleOpsBeamFrom = async (e: React.MouseEvent) => {
     e.stopPropagation();
     closeOpsMenu();
-    props.onConversationRestartFrom && labsChatBeam && await props.onConversationRestartFrom(messageId, fromAssistant ? -1 : 0, true);
+    labsBeam && await props.onMessageBeam?.(messageId);
+  };
+
+  const handleOpsBranch = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation(); // to try to not steal the focus from the banched conversation
+    props.onMessageBranch?.(messageId);
+    closeOpsMenu();
   };
 
   const handleOpsToggleShowDiff = () => setShowDiff(!showDiff);
@@ -325,12 +359,12 @@ export function ChatMessage(props: {
   };
 
   const handleOpsTruncate = (_e: React.MouseEvent) => {
-    props.onConversationTruncate && props.onConversationTruncate(messageId);
+    props.onMessageTruncate?.(messageId);
     closeOpsMenu();
   };
 
   const handleOpsDelete = (_e: React.MouseEvent) => {
-    props.onMessageDelete && props.onMessageDelete(messageId);
+    props.onMessageDelete?.(messageId);
   };
 
 
@@ -411,16 +445,32 @@ export function ChatMessage(props: {
 
   return (
     <ListItem
+      role='chat-message'
       sx={{
         // style
         backgroundColor: backgroundColor,
         px: { xs: 1, md: themeScalingMap[contentScaling]?.chatMessagePadding ?? 2 },
         py: themeScalingMap[contentScaling]?.chatMessagePadding ?? 2,
+
+        // style: omit border if set externally
         ...(!('borderBottom' in (props.sx || {})) && {
           borderBottom: '1px solid',
           borderBottomColor: 'divider',
         }),
-        ...(!!props.topDecorator && { pt: '3rem' }),
+
+        // style: when starred
+        ...(isUserStarred && {
+          outline: '3px solid',
+          outlineColor: 'primary.solidBg',
+          boxShadow: 'lg',
+          borderRadius: 'lg',
+          zIndex: 1,
+        }),
+
+        // style: make room for a top decorator if set
+        ...(!!props.topDecorator && {
+          pt: '2.5rem',
+        }),
         '&:hover > button': { opacity: 1 },
 
         // layout
@@ -440,31 +490,29 @@ export function ChatMessage(props: {
         </Box>
       )}
 
-      {/* Avatar */}
+      {/* Avatar (Persona) */}
       {showAvatar && (
-        <Box
-          onMouseEnter={() => setIsHovering(true)} onMouseLeave={() => setIsHovering(false)}
-          onClick={event => setOpsMenuAnchor(event.currentTarget)}
-          sx={{
-            // flexBasis: 0, // this won't let the item grow
-            display: 'flex', flexDirection: 'column', alignItems: 'center',
-            minWidth: { xs: 50, md: 64 },
-            maxWidth: 80,
-            textAlign: 'center',
-          }}
-        >
+        <Box sx={personaSx}>
 
-          {isHovering ? (
-            <IconButton variant='soft' color={(fromAssistant || fromSystem) ? 'neutral' : 'primary'} sx={avatarIconSx}>
-              <MoreVertIcon />
-            </IconButton>
-          ) : (
-            avatarEl
-          )}
+          {/* Persona Avatar or Menu Button */}
+          <Box
+            onClick={event => setOpsMenuAnchor(event.currentTarget)}
+            onMouseEnter={() => setIsHovering(true)}
+            onMouseLeave={() => setIsHovering(false)}
+            sx={{ display: 'flex' }}
+          >
+            {(isHovering || opsMenuAnchor) ? (
+              <IconButton variant={opsMenuAnchor ? 'solid' : 'soft'} color={(fromAssistant || fromSystem) ? 'neutral' : 'primary'} sx={avatarIconSx}>
+                <MoreVertIcon />
+              </IconButton>
+            ) : (
+              avatarEl
+            )}
+          </Box>
 
           {/* Assistant model name */}
           {fromAssistant && (
-            <Tooltip title={messageTyping ? null : (messageOriginLLM || 'unk-model')} variant='solid'>
+            <Tooltip arrow title={messageTyping ? null : (messageOriginLLM || 'unk-model')} variant='solid'>
               <Typography level='body-xs' sx={{
                 overflowWrap: 'anywhere',
                 ...(messageTyping ? { animation: `${animationColorRainbow} 5s linear infinite` } : {}),
@@ -498,6 +546,7 @@ export function ChatMessage(props: {
           renderTextAsMarkdown={renderMarkdown}
           renderTextDiff={textDiffs || undefined}
           showDate={props.showBlocksDate === true ? messageUpdated || messageCreated || undefined : undefined}
+          showUnsafeHtml={props.showUnsafeHtml}
           wasUserEdited={wasEdited}
           onContextMenu={(props.onMessageEdit && ENABLE_SELECTION_RIGHT_CLICK_MENU) ? handleBlocksContextMenu : undefined}
           onDoubleClick={(props.onMessageEdit && doubleClickToEdit) ? handleBlocksDoubleClick : undefined}
@@ -540,29 +589,33 @@ export function ChatMessage(props: {
 
           {/* Edit / Copy */}
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            {/* Edit */}
             {!!props.onMessageEdit && (
               <MenuItem variant='plain' disabled={messageTyping} onClick={handleOpsEdit} sx={{ flex: 1 }}>
-                <ListItemDecorator><EditIcon /></ListItemDecorator>
+                <ListItemDecorator><EditRoundedIcon /></ListItemDecorator>
                 {isEditing ? 'Discard' : 'Edit'}
                 {/*{!isEditing && <span style={{ opacity: 0.5, marginLeft: '8px' }}>{doubleClickToEdit ? '(double-click)' : ''}</span>}*/}
               </MenuItem>
             )}
+            {/* Copy */}
             <MenuItem onClick={handleOpsCopy} sx={{ flex: 1 }}>
               <ListItemDecorator><ContentCopyIcon /></ListItemDecorator>
               Copy
             </MenuItem>
+            {/* Starred */}
+            {!!onMessageToggleUserFlag && (
+              <MenuItem onClick={handleOpsToggleStarred} sx={{ flexGrow: 0, px: 1 }}>
+                {isUserStarred
+                  ? <StarRoundedIcon color='primary' sx={{ fontSize: 'xl2' }} />
+                  : <StarOutlineRoundedIcon sx={{ fontSize: 'xl2' }} />
+                }
+              </MenuItem>
+            )}
           </Box>
           {/* Delete / Branch / Truncate */}
-          {!!props.onMessageDelete && <ListDivider />}
-          {!!props.onMessageDelete && (
-            <MenuItem onClick={handleOpsDelete} disabled={false /*fromSystem*/}>
-              <ListItemDecorator><ClearIcon /></ListItemDecorator>
-              Delete
-              <span style={{ opacity: 0.5 }}>message</span>
-            </MenuItem>
-          )}
-          {!!props.onConversationBranch && (
-            <MenuItem onClick={handleOpsConversationBranch} disabled={fromSystem}>
+          {!!props.onMessageBranch && <ListDivider />}
+          {!!props.onMessageBranch && (
+            <MenuItem onClick={handleOpsBranch} disabled={fromSystem}>
               <ListItemDecorator>
                 <ForkRightIcon />
               </ListItemDecorator>
@@ -570,7 +623,14 @@ export function ChatMessage(props: {
               {!props.isBottom && <span style={{ opacity: 0.5 }}>from here</span>}
             </MenuItem>
           )}
-          {!!props.onConversationTruncate && (
+          {!!props.onMessageDelete && (
+            <MenuItem onClick={handleOpsDelete} disabled={false /*fromSystem*/}>
+              <ListItemDecorator><ClearIcon /></ListItemDecorator>
+              Delete
+              <span style={{ opacity: 0.5 }}>message</span>
+            </MenuItem>
+          )}
+          {!!props.onMessageTruncate && (
             <MenuItem onClick={handleOpsTruncate} disabled={props.isBottom}>
               <ListItemDecorator><VerticalAlignBottomIcon /></ListItemDecorator>
               Truncate
@@ -590,47 +650,44 @@ export function ChatMessage(props: {
           {!!props.onTextDiagram && <ListDivider />}
           {!!props.onTextDiagram && (
             <MenuItem onClick={handleOpsDiagram} disabled={!couldDiagram}>
-              <ListItemDecorator><AccountTreeIcon color='success' /></ListItemDecorator>
-              Diagram ...
+              <ListItemDecorator><AccountTreeTwoToneIcon /></ListItemDecorator>
+              Auto-Diagram ...
             </MenuItem>
           )}
           {!!props.onTextImagine && (
             <MenuItem onClick={handleOpsImagine} disabled={!couldImagine || props.isImagining}>
-              <ListItemDecorator>{props.isImagining ? <CircularProgress size='sm' /> : <FormatPaintIcon color='success' />}</ListItemDecorator>
-              Draw ...
+              <ListItemDecorator>{props.isImagining ? <CircularProgress size='sm' /> : <FormatPaintTwoToneIcon />}</ListItemDecorator>
+              Auto-Draw
             </MenuItem>
           )}
           {!!props.onTextSpeak && (
             <MenuItem onClick={handleOpsSpeak} disabled={!couldSpeak || props.isSpeaking}>
-              <ListItemDecorator>{props.isSpeaking ? <CircularProgress size='sm' /> : <RecordVoiceOverIcon color='success' />}</ListItemDecorator>
+              <ListItemDecorator>{props.isSpeaking ? <CircularProgress size='sm' /> : <RecordVoiceOverTwoToneIcon />}</ListItemDecorator>
               Speak
             </MenuItem>
           )}
-          {/* Restart/try */}
-          {!!props.onConversationRestartFrom && <ListDivider />}
-          {!!props.onConversationRestartFrom && (
-            <MenuItem onClick={handleOpsConversationRestartFrom}>
+          {/* Beam/Restart */}
+          {(!!props.onMessageAssistantFrom || !!props.onMessageBeam) && <ListDivider />}
+          {!!props.onMessageAssistantFrom && (
+            <MenuItem disabled={fromSystem} onClick={handleOpsAssistantFrom}>
               <ListItemDecorator>{fromAssistant ? <ReplayIcon color='primary' /> : <TelegramIcon color='primary' />}</ListItemDecorator>
               {!fromAssistant
                 ? <>Restart <span style={{ opacity: 0.5 }}>from here</span></>
                 : !props.isBottom
                   ? <>Retry <span style={{ opacity: 0.5 }}>from here</span></>
-                  : <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'space-between', gap: 1 }}>
-                    Retry
-                    <KeyStroke combo='Ctrl + Shift + R' />
-                  </Box>}
-              {labsChatBeam && (
-                <Tooltip title={messageTyping ? null : 'Beam'}>
-                  <IconButton
-                    size='sm'
-                    variant='outlined' color='primary'
-                    onClick={handleOpsConversationRestartFromBeam}
-                    sx={{ ml: 'auto', my: '-0.25rem' /* absorb the menuItem padding */ }}
-                  >
-                    <ChatBeamIcon /> {/*<GavelIcon />*/}
-                  </IconButton>
-                </Tooltip>
-              )}
+                  : <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'space-between', gap: 1 }}>Retry<KeyStroke combo='Ctrl + Shift + R' /></Box>}
+            </MenuItem>
+          )}
+          {!!props.onMessageBeam && labsBeam && (
+            <MenuItem disabled={fromSystem} onClick={handleOpsBeamFrom}>
+              <ListItemDecorator>
+                <ChatBeamIcon color={fromSystem ? undefined : 'primary'} />
+              </ListItemDecorator>
+              {!fromAssistant
+                ? <>Beam <span style={{ opacity: 0.5 }}>from here</span></>
+                : !props.isBottom
+                  ? <>Beam <span style={{ opacity: 0.5 }}>this message</span></>
+                  : <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'space-between', gap: 1 }}>Beam<KeyStroke combo='Ctrl + Shift + B' /></Box>}
             </MenuItem>
           )}
         </CloseableMenu>
@@ -643,20 +700,21 @@ export function ChatMessage(props: {
           open anchorEl={selMenuAnchor} onClose={closeSelectionMenu}
           sx={{ minWidth: 220 }}
         >
-          <MenuItem onClick={handleOpsCopy} sx={{ flex: 1 }}>
+          <MenuItem onClick={handleOpsCopy} sx={{ flex: 1, alignItems: 'center' }}>
             <ListItemDecorator><ContentCopyIcon /></ListItemDecorator>
-            Copy <span style={{ opacity: 0.5 }}>selection</span>
+            Copy
           </MenuItem>
+          {!!props.onTextDiagram && <ListDivider />}
           {!!props.onTextDiagram && <MenuItem onClick={handleOpsDiagram} disabled={!couldDiagram || props.isImagining}>
-            <ListItemDecorator><AccountTreeIcon color='success' /></ListItemDecorator>
-            Diagram ...
+            <ListItemDecorator><AccountTreeTwoToneIcon /></ListItemDecorator>
+            Auto-Diagram ...
           </MenuItem>}
           {!!props.onTextImagine && <MenuItem onClick={handleOpsImagine} disabled={!couldImagine || props.isImagining}>
-            <ListItemDecorator>{props.isImagining ? <CircularProgress size='sm' /> : <FormatPaintIcon color='success' />}</ListItemDecorator>
-            Imagine
+            <ListItemDecorator>{props.isImagining ? <CircularProgress size='sm' /> : <FormatPaintTwoToneIcon />}</ListItemDecorator>
+            Auto-Draw
           </MenuItem>}
           {!!props.onTextSpeak && <MenuItem onClick={handleOpsSpeak} disabled={!couldSpeak || props.isSpeaking}>
-            <ListItemDecorator>{props.isSpeaking ? <CircularProgress size='sm' /> : <RecordVoiceOverIcon color='success' />}</ListItemDecorator>
+            <ListItemDecorator>{props.isSpeaking ? <CircularProgress size='sm' /> : <RecordVoiceOverTwoToneIcon />}</ListItemDecorator>
             Speak
           </MenuItem>}
         </CloseableMenu>

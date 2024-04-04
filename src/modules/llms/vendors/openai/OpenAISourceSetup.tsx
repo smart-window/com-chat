@@ -28,13 +28,12 @@ export function OpenAISourceSetup(props: { sourceId: DModelSourceId }) {
   const advanced = useToggleableBoolean(!!props.sourceId?.includes('-'));
 
   // external state
-  const { source, sourceHasLLMs, access, updateSetup } =
+  const { source, sourceHasLLMs, access, hasNoBackendCap: needsUserKey, updateSetup } =
     useSourceSetup(props.sourceId, ModelVendorOpenAI);
 
   // derived state
-  const { oaiKey, oaiOrg, oaiHost, heliKey, moderationCheck, defaultCheck } = access;
+  const { oaiKey, oaiOrg, oaiHost, heliKey, moderationCheck } = access;
 
-  const needsUserKey = !ModelVendorOpenAI.hasBackendCap?.();
   const keyValid = isValidOpenAIApiKey(oaiKey);
   const keyError = (/*needsUserKey ||*/ !!oaiKey) && !keyValid;
   const shallFetchSucceed = oaiKey ? keyValid : !needsUserKey;
@@ -72,8 +71,8 @@ export function OpenAISourceSetup(props: { sourceId: DModelSourceId }) {
 
     {!!heliKey && <Alert variant='soft' color={oaiHost?.includes(HELICONE_OPENAI_HOST) ? 'success' : 'warning'}>
       Advanced: You set the Helicone key. {!oaiHost?.includes(HELICONE_OPENAI_HOST)
-        ? `But you also need to set the OpenAI Host to ${HELICONE_OPENAI_HOST} to use Helicone.`
-        : 'OpenAI traffic will now be routed through Helicone.'}
+      ? `But you also need to set the OpenAI Host to ${HELICONE_OPENAI_HOST} to use Helicone.`
+      : 'OpenAI traffic will now be routed through Helicone.'}
     </Alert>}
 
     {advanced.on && <FormSwitchControl
@@ -86,7 +85,7 @@ export function OpenAISourceSetup(props: { sourceId: DModelSourceId }) {
       onChange={on => updateSetup({ moderationCheck: on })}
     />}
 
-    <SetupFormRefetchButton defaultCheck={defaultCheck} refetch={refetch} disabled={isFetching} error={isError} loading={isFetching} advanced={advanced} />
+    <SetupFormRefetchButton refetch={refetch} disabled={isFetching} error={isError} loading={isFetching} advanced={advanced} />
 
     {isError && <InlineError error={error} />}
 

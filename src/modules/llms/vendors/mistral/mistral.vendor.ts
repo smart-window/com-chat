@@ -1,5 +1,3 @@
-import { backendCaps } from '~/modules/backend/state-backend';
-
 import { MistralIcon } from '~/common/components/icons/vendors/MistralIcon';
 
 import type { IModelVendor } from '../IModelVendor';
@@ -24,7 +22,7 @@ export const ModelVendorMistral: IModelVendor<SourceSetupMistral, OpenAIAccessSc
   rank: 15,
   location: 'cloud',
   instanceLimit: 1,
-  hasBackendCap: () => backendCaps().hasLlmMistral,
+  hasBackendCapKey: 'hasLlmMistral',
 
   // components
   Icon: MistralIcon,
@@ -46,11 +44,10 @@ export const ModelVendorMistral: IModelVendor<SourceSetupMistral, OpenAIAccessSc
     oaiHost: partialSetup?.oaiHost || '',
     heliKey: '',
     moderationCheck: false,
-    defaultCheck: false,
   }),
 
   // OpenAI transport ('mistral' dialect in 'access')
-  rpcUpdateModelsQuery: ModelVendorOpenAI.rpcUpdateModelsQuery,
+  rpcUpdateModelsOrThrow: ModelVendorOpenAI.rpcUpdateModelsOrThrow,
   rpcChatGenerateOrThrow: ModelVendorOpenAI.rpcChatGenerateOrThrow,
   streamingChatGenerateOrThrow: ModelVendorOpenAI.streamingChatGenerateOrThrow,
 };

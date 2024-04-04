@@ -36,11 +36,10 @@ export const ModelVendorOoobabooga: IModelVendor<SourceSetupOobabooga, OpenAIAcc
     oaiHost: partialSetup?.oaiHost || '',
     heliKey: '',
     moderationCheck: false,
-    defaultCheck: false,
   }),
 
   // OpenAI transport (oobabooga dialect in 'access')
-  rpcUpdateModelsQuery: ModelVendorOpenAI.rpcUpdateModelsQuery,
+  rpcUpdateModelsOrThrow: ModelVendorOpenAI.rpcUpdateModelsOrThrow,
   rpcChatGenerateOrThrow: ModelVendorOpenAI.rpcChatGenerateOrThrow,
   streamingChatGenerateOrThrow: ModelVendorOpenAI.streamingChatGenerateOrThrow,
 };

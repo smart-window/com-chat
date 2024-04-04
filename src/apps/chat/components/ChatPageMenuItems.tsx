@@ -5,7 +5,6 @@ import AddIcon from '@mui/icons-material/Add';
 import CheckBoxOutlineBlankOutlinedIcon from '@mui/icons-material/CheckBoxOutlineBlankOutlined';
 import CheckBoxOutlinedIcon from '@mui/icons-material/CheckBoxOutlined';
 import ClearIcon from '@mui/icons-material/Clear';
-import LogoutIcon from '@mui/icons-material/Logout';
 import CompressIcon from '@mui/icons-material/Compress';
 import ForkRightIcon from '@mui/icons-material/ForkRight';
 import HorizontalSplitIcon from '@mui/icons-material/HorizontalSplit';
@@ -20,7 +19,7 @@ import { useOptimaDrawers } from '~/common/layout/optima/useOptimaDrawers';
 
 import { useChatShowSystemMessages } from '../store-app-chat';
 import { usePaneDuplicateOrClose } from './panes/usePanesManager';
-import firebase from '../../../../config/firebase';
+
 
 export function ChatPageMenuItems(props: {
   isMobile: boolean,
@@ -68,16 +67,6 @@ export function ChatPageMenuItems(props: {
   const handleConversationClear = (event: React.MouseEvent<HTMLDivElement>) => {
     closeMenu(event);
     props.conversationId && props.onConversationClear(props.conversationId);
-  };
-
-  const handleSignOut = (event: React.MouseEvent<HTMLDivElement>) => {
-    firebase.auth().signOut().then(() => {
-      // Sign-out successful.
-      console.log("User signed out.");
-    }).catch((error) => {
-      // An error happened.
-      console.error("Error signing out:", error);
-    });
   };
 
   const handleConversationBranch = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -155,13 +144,6 @@ export function ChatPageMenuItems(props: {
       <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'space-between', gap: 1 }}>
         Reset Chat
         {!props.disableItems && <KeyStroke combo='Ctrl + Alt + X' />}
-      </Box>
-    </MenuItem>
-
-    <MenuItem onClick={handleSignOut}>
-      <ListItemDecorator><LogoutIcon /></ListItemDecorator>
-      <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'space-between', gap: 1 }}>
-        Sign Out
       </Box>
     </MenuItem>
 

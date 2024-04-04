@@ -1,5 +1,3 @@
-import { backendCaps } from '~/modules/backend/state-backend';
-
 import { OpenRouterIcon } from '~/common/components/icons/vendors/OpenRouterIcon';
 
 import type { IModelVendor } from '../IModelVendor';
@@ -18,7 +16,6 @@ export const isValidOpenRouterKey = (apiKey?: string) => !!apiKey && apiKey.star
 export interface SourceSetupOpenRouter {
   oaiKey: string;
   oaiHost: string;
-  defaultCheck: boolean;
 }
 
 /**
@@ -39,7 +36,7 @@ export const ModelVendorOpenRouter: IModelVendor<SourceSetupOpenRouter, OpenAIAc
   location: 'cloud',
   instanceLimit: 1,
   hasFreeModels: true,
-  hasBackendCap: () => backendCaps().hasLlmOpenRouter,
+  hasBackendCapKey: 'hasLlmOpenRouter',
 
   // components
   Icon: OpenRouterIcon,
@@ -50,16 +47,14 @@ export const ModelVendorOpenRouter: IModelVendor<SourceSetupOpenRouter, OpenAIAc
   initializeSetup: (): SourceSetupOpenRouter => ({
     oaiHost: 'https://openrouter.ai/api',
     oaiKey: '',
-    defaultCheck: true
   }),
-  getTransportAccess: (partialSetup: OpenAIAccessSchema): OpenAIAccessSchema => ({
+  getTransportAccess: (partialSetup): OpenAIAccessSchema => ({
     dialect: 'openrouter',
     oaiKey: partialSetup?.oaiKey || '',
     oaiOrg: '',
     oaiHost: partialSetup?.oaiHost || '',
     heliKey: '',
     moderationCheck: false,
-    defaultCheck: partialSetup?.defaultCheck,
   }),
 
   // there is delay for OpenRouter Free API calls
@@ -81,7 +76,7 @@ export const ModelVendorOpenRouter: IModelVendor<SourceSetupOpenRouter, OpenAIAc
   },
 
   // OpenAI transport ('openrouter' dialect in 'access')
-  rpcUpdateModelsQuery: ModelVendorOpenAI.rpcUpdateModelsQuery,
+  rpcUpdateModelsOrThrow: ModelVendorOpenAI.rpcUpdateModelsOrThrow,
   rpcChatGenerateOrThrow: ModelVendorOpenAI.rpcChatGenerateOrThrow,
   streamingChatGenerateOrThrow: ModelVendorOpenAI.streamingChatGenerateOrThrow,
 };

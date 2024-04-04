@@ -18,11 +18,11 @@ export const Brand = {
     TwitterSite: '@comchat_io',
   },
   URIs: {
-    Home: 'https://com-chat.io',
-    CardImage: 'https://com-chat.io/icons/card-dark-1200.png',
+    Home: 'https://comchat.io',
+    CardImage: 'https://comchat.io/icons/card-dark-1200.png',
     OpenRepo: 'https://github.com/smart-window/com-chat',
     OpenProject: 'https://github.com/users/smart-window',
     SupportInvite: 'https://discord.gg/communeai',
-    PrivacyPolicy: 'https://com-chat.io/privacy',
+    PrivacyPolicy: 'https://comchat.io/privacy',
   },
 } as const;

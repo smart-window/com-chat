@@ -1,5 +1,3 @@
-import { backendCaps } from '~/modules/backend/state-backend';
-
 import { AzureIcon } from '~/common/components/icons/vendors/AzureIcon';
 
 import type { IModelVendor } from '../IModelVendor';
@@ -41,7 +39,7 @@ export const ModelVendorAzure: IModelVendor<SourceSetupAzure, OpenAIAccessSchema
   rank: 14,
   location: 'cloud',
   instanceLimit: 2,
-  hasBackendCap: () => backendCaps().hasLlmAzureOpenAI,
+  hasBackendCapKey: 'hasLlmAzureOpenAI',
 
   // components
   Icon: AzureIcon,
@@ -56,11 +54,10 @@ export const ModelVendorAzure: IModelVendor<SourceSetupAzure, OpenAIAccessSchema
     oaiHost: partialSetup?.azureEndpoint || '',
     heliKey: '',
     moderationCheck: false,
-    defaultCheck: false,
   }),
 
   // OpenAI transport ('azure' dialect in 'access')
-  rpcUpdateModelsQuery: ModelVendorOpenAI.rpcUpdateModelsQuery,
+  rpcUpdateModelsOrThrow: ModelVendorOpenAI.rpcUpdateModelsOrThrow,
   rpcChatGenerateOrThrow: ModelVendorOpenAI.rpcChatGenerateOrThrow,
   streamingChatGenerateOrThrow: ModelVendorOpenAI.streamingChatGenerateOrThrow,
 };

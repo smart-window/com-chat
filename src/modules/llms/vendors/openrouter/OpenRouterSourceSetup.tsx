@@ -13,19 +13,17 @@ import { useLlmUpdateModels } from '../useLlmUpdateModels';
 import { useSourceSetup } from '../useSourceSetup';
 
 import { isValidOpenRouterKey, ModelVendorOpenRouter } from './openrouter.vendor';
-import { FormSwitchControl } from '~/common/components/forms/FormSwitchControl';
 
 
 export function OpenRouterSourceSetup(props: { sourceId: DModelSourceId }) {
 
   // external state
-  const { source, sourceHasLLMs, access, updateSetup } =
+  const { source, sourceHasLLMs, access, hasNoBackendCap: needsUserKey, updateSetup } =
     useSourceSetup(props.sourceId, ModelVendorOpenRouter);
 
   // derived state
-  const { oaiKey, defaultCheck } = access;
+  const { oaiKey } = access;
 
-  const needsUserKey = !ModelVendorOpenRouter.hasBackendCap?.();
   const keyValid = isValidOpenRouterKey(oaiKey);
   const keyError = (/*needsUserKey ||*/ !!oaiKey) && !keyValid;
   const shallFetchSucceed = oaiKey ? keyValid : !needsUserKey;
@@ -50,8 +48,13 @@ export function OpenRouterSourceSetup(props: { sourceId: DModelSourceId }) {
       <Link href='https://openrouter.ai/keys' target='_blank'>OpenRouter</Link> is an independent service
       granting access to <Link href='https://openrouter.ai/docs#models' target='_blank'>exclusive models</Link> such
       as GPT-4 32k, Claude, and more. <Link
-        href='https://github.com/smart-window/com-chat/blob/main/docs/config-openrouter.md' target='_blank'>
-        Configuration &amp; documentation</Link>.
+      href='https://github.com/smart-window/com-chat/blob/main/docs/config-openrouter.md' target='_blank'>
+      Configuration &amp; documentation</Link>.
+    </Typography>
+
+    <Typography level='body-sm'>
+      🎁 A selection of <Link href='https://openrouter.ai/docs#models' target='_blank'>OpenRouter models</Link> are
+      made available without charge. You can get an API key by using the Login button below.
     </Typography>
 
     <SetupFormRefetchButton

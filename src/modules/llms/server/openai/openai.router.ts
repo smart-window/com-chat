@@ -26,7 +26,6 @@ export const openAIAccessSchema = z.object({
   oaiHost: z.string().trim(),
   heliKey: z.string().trim(),
   moderationCheck: z.boolean(),
-  defaultCheck: z.boolean(),
 });
 export type OpenAIAccessSchema = z.infer<typeof openAIAccessSchema>;
 
@@ -73,12 +72,13 @@ const chatGenerateWithFunctionsInputSchema = z.object({
 
 const createImagesInputSchema = z.object({
   access: openAIAccessSchema,
-  request: z.object({
+  // for this object sync with <> wireOpenAICreateImageRequestSchema
+  config: z.object({
     prompt: z.string(),
     count: z.number().min(1),
-    model: z.enum(['dall-e-2', 'dall-e-3']),
+    model: z.enum(['dall-e-2', 'dall-e-3' /*, 'stablediffusion' for [LocalAI] */]),
     quality: z.enum(['standard', 'hd']),
-    asUrl: z.boolean(), // if false, returns a base64 encoded data Url
+    responseFormat: z.enum(['url', 'b64_json']), /* udpated to directly match OpenAI's formats - shall have an intermediate representation instead? */
     size: z.enum(['256x256', '512x512', '1024x1024', '1792x1024', '1024x1792']),
     style: z.enum(['natural', 'vivid']),
   }),
@@ -279,30 +279,35 @@ export const llmOpenAIRouter = createTRPCRouter({
         : parseChatGenerateOutput(message as OpenAIWire.ChatCompletion.ResponseMessage, finish_reason);
     }),
 
-  /* [OpenAI] images/generations */
+  /* [OpenAI/LocalAI] images/generations */
   createImages: publicProcedure
     .input(createImagesInputSchema)
     .output(t2iCreateImagesOutputSchema)
-    .mutation(async ({ input: { access, request } }) => {
+    .mutation(async ({ input: { access, config } }) => {
 
       // Validate input
-      if (request.model === 'dall-e-3' && request.count > 1)
+      if (config.model === 'dall-e-3' && config.count > 1)
         throw new TRPCError({ code: 'BAD_REQUEST', message: `[OpenAI Issue] dall-e-3 model does not support more than 1 image` });
+
+      // images/generations request body
+      const requestBody: WireOpenAICreateImageRequest = {
+        prompt: config.prompt,
+        model: config.model,
+        n: config.count,
+        quality: config.quality,
+        response_format: config.responseFormat,
+        size: config.size,
+        style: config.style,
+        user: 'com-chat',
+      };
+
+      // [LocalAI] Fix: LocalAI does not want the 'response_format' field
+      if (access.dialect === 'localai')
+        delete requestBody.response_format;
 
       // create 1 image (dall-e-3 won't support more than 1, so better transfer the burden to the client)
       const wireOpenAICreateImageOutput = await openaiPOST<WireOpenAICreateImageOutput, WireOpenAICreateImageRequest>(
-        access, null,
-        {
-          prompt: request.prompt,
-          model: request.model,
-          n: request.count,
-          quality: request.quality,
-          response_format: request.asUrl ? 'url' : 'b64_json',
-          size: request.size,
-          style: request.style,
-          user: 'com-chat',
-        },
-        '/v1/images/generations',
+        access, null, requestBody, '/v1/images/generations',
       );
 
       // expect a single image and as URL
@@ -312,7 +317,7 @@ export const llmOpenAIRouter = createTRPCRouter({
           throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: `[OpenAI Issue] Expected a url, got a b64_json (which is not implemented yet)` });
         return {
           imageUrl: image.url,
-          altText: image.revised_prompt || request.prompt,
+          altText: image.revised_prompt || config.prompt,
         };
       });
     }),
@@ -391,7 +396,7 @@ export function openAIAccess(access: OpenAIAccessSchema, modelRefId: string | nu
       const azureKey = access.oaiKey || env.AZURE_OPENAI_API_KEY || '';
       const azureHost = fixupHost(access.oaiHost || env.AZURE_OPENAI_API_ENDPOINT || '', apiPath);
       if (!azureKey || !azureHost)
-        throw new Error('Missing Azure API Key or Host. Add it on the UI (Models Setup) or use default system api key.');
+        throw new Error('Missing Azure API Key or Host. Add it on the UI (Models Setup) or server side (your deployment).');
 
       let url = azureHost;
       if (apiPath.startsWith('/v1/')) {
@@ -415,12 +420,12 @@ export function openAIAccess(access: OpenAIAccessSchema, modelRefId: string | nu
     case 'lmstudio':
     case 'oobabooga':
     case 'openai':
-      const oaiKey = access.defaultCheck ? (env.OPENAI_API_KEY || '') : (access.oaiKey || '');
+      const oaiKey = access.oaiKey || env.OPENAI_API_KEY || '';
       const oaiOrg = access.oaiOrg || env.OPENAI_API_ORG_ID || '';
       let oaiHost = fixupHost(access.oaiHost || env.OPENAI_API_HOST || DEFAULT_OPENAI_HOST, apiPath);
       // warn if no key - only for default (non-overridden) hosts
       if (!oaiKey && oaiHost.indexOf(DEFAULT_OPENAI_HOST) !== -1)
-        throw new Error('Missing OpenAI API Key. Add it on the UI (Models Setup) or use default system api key.');
+        throw new Error('Missing OpenAI API Key. Add it on the UI (Models Setup) or server side (your deployment).');
 
       // [Helicone]
       // We don't change the host (as we do on Anthropic's), as we expect the user to have a custom host.
@@ -469,7 +474,7 @@ export function openAIAccess(access: OpenAIAccessSchema, modelRefId: string | nu
       const groqKey = access.oaiKey || env.GROQ_API_KEY || '';
       const groqHost = fixupHost(access.oaiHost || DEFAULT_GROQ_HOST, apiPath);
       if (!groqKey)
-        throw new Error('Missing Groq API Key. Add it on the UI (Models Setup) or use default system api key.');
+        throw new Error('Missing Groq API Key. Add it on the UI (Models Setup) or server side (your deployment).');
 
       return {
         headers: {
@@ -508,10 +513,10 @@ export function openAIAccess(access: OpenAIAccessSchema, modelRefId: string | nu
 
 
     case 'openrouter':
-      const orKey = access.defaultCheck ? (env.OPENROUTER_API_KEY || '') : (access.oaiKey || '');
+      const orKey = access.oaiKey || env.OPENROUTER_API_KEY || '';
       const orHost = fixupHost(access.oaiHost || DEFAULT_OPENROUTER_HOST, apiPath);
       if (!orKey || !orHost)
-        throw new Error('Missing OpenRouter API Key or Host. Add it on the UI (Models Setup) or use default system api key.');
+        throw new Error('Missing OpenRouter API Key or Host. Add it on the UI (Models Setup) or server side (your deployment).');
 
       return {
         headers: {
@@ -527,7 +532,7 @@ export function openAIAccess(access: OpenAIAccessSchema, modelRefId: string | nu
       const perplexityKey = access.oaiKey || env.PERPLEXITY_API_KEY || '';
       const perplexityHost = fixupHost(access.oaiHost || DEFAULT_PERPLEXITY_HOST, apiPath);
       if (!perplexityKey || !perplexityHost)
-        throw new Error('Missing Perplexity API Key or Host. Add it on the UI (Models Setup) or use default system api key.');
+        throw new Error('Missing Perplexity API Key or Host. Add it on the UI (Models Setup) or server side (your deployment).');
 
       if (apiPath.startsWith('/v1'))
         apiPath = apiPath.replace('/v1', '');
@@ -546,7 +551,7 @@ export function openAIAccess(access: OpenAIAccessSchema, modelRefId: string | nu
       const togetherKey = access.oaiKey || env.TOGETHERAI_API_KEY || '';
       const togetherHost = fixupHost(access.oaiHost || DEFAULT_TOGETHERAI_HOST, apiPath);
       if (!togetherKey || !togetherHost)
-        throw new Error('Missing TogetherAI API Key or Host. Add it on the UI (Models Setup) or use default system api key.');
+        throw new Error('Missing TogetherAI API Key or Host. Add it on the UI (Models Setup) or server side (your deployment).');
 
       return {
         headers: {

@@ -8,6 +8,7 @@ import LightModeIcon from '@mui/icons-material/LightMode';
 import MenuIcon from '@mui/icons-material/Menu';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import SettingsIcon from '@mui/icons-material/Settings';
+import LogoutIcon from '@mui/icons-material/Logout';
 
 import { checkVisibleNav, NavItemApp } from '~/common/app.nav';
 import { Brand } from '~/common/app.config';
@@ -19,7 +20,7 @@ import { InvertedBar, InvertedBarCornerItem } from './components/InvertedBar';
 import { MobileNavListItem } from './MobileNavListItem';
 import { useOptimaDrawers } from './useOptimaDrawers';
 import { useOptimaLayout } from './useOptimaLayout';
-
+import firebase from '../../../../config/firebase';
 
 const PageBarItemsFallback = (props: { currentApp?: NavItemApp }) =>
   <Box sx={{
@@ -50,6 +51,16 @@ function CommonPageMenuItems(props: { onClose: () => void }) {
     setColorMode(colorMode === 'dark' ? 'light' : 'dark');
   };
 
+  const handleSignOut = (event: React.MouseEvent<HTMLDivElement>) => {
+    firebase.auth().signOut().then(() => {
+      // Sign-out successful.
+      console.log("User signed out.");
+    }).catch((error) => {
+      // An error happened.
+      console.error("Error signing out:", error);
+    });
+  };
+
   return <>
 
     {/*<MenuItem onClick={handleToggleDarkMode}>*/}
@@ -60,6 +71,11 @@ function CommonPageMenuItems(props: { onClose: () => void }) {
 
     {/* Preferences |...| Dark Mode Toggle */}
     {/*<Tooltip title={<KeyStroke combo='Ctrl + Shift + P' />}>*/}
+    <MenuItem onClick={handleSignOut}>
+      <ListItemDecorator><LogoutIcon /></ListItemDecorator>
+      Sign Out
+    </MenuItem>
+
     <MenuItem onClick={handleShowSettings}>
       <ListItemDecorator><SettingsIcon /></ListItemDecorator>
       Preferences

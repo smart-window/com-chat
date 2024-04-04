@@ -1,17 +1,21 @@
 # com-chat 🧠✨
 
-Welcome to com-chat 👋, the GPT application for professionals that need function, form,
+Welcome to com-chat, the AI suite for professionals that need function, form,
 simplicity, and speed. Powered by the latest models from 12 vendors and
-open-source model servers, `com-chat` offers best-in-class Voice and Chat with AI Personas,
-visualizations, coding, drawing, calling, and quite more -- all in a polished UX.
+open-source servers, `com-chat` offers best-in-class Chats,
+[Beams](https://github.com/smart-window/com-chat/issues/470),
+and [Calls](https://github.com/smart-window/com-chat/issues/354) with AI personas,
+visualizations, coding, drawing, side-by-side chatting, and more -- all wrapped in a polished UX.
 
-Pros use com-chat. 🚀 Developers love com-chat. 🤖
+Stay ahead of the curve with com-chat. 🚀 Pros & Devs love com-chat. 🤖
 
-## ✨ Key Features 👊
+Or fork & run on Vercel
+
+## 👉 Key Features ✨
 
 | ![Advanced AI](https://img.shields.io/badge/Advanced%20AI-32383e?style=for-the-badge&logo=ai&logoColor=white) | ![100+ AI Models](https://img.shields.io/badge/100%2B%20AI%20Models-32383e?style=for-the-badge&logo=ai&logoColor=white) | ![Flow-state UX](https://img.shields.io/badge/Flow--state%20UX-32383e?style=for-the-badge&logo=flow&logoColor=white) | ![Privacy First](https://img.shields.io/badge/Privacy%20First-32383e?style=for-the-badge&logo=privacy&logoColor=white) | ![Advanced Tools](https://img.shields.io/badge/Fun%20To%20Use-f22a85?style=for-the-badge&logo=tools&logoColor=white) |  
 |---------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------| 
-| **Chat**<br/>**Call** AGI<br/>**Draw** images<br/>**Agents**, ...                                             | Local & Cloud<br/>Open & Closed<br/>Cheap & Heavy<br/>Google, Mistral, ...                                              | Attachments<br/>Diagrams<br/>Multi-Chat<br/>Mobile-first UI                                                          | Stored Locally<br/>Easy self-Host<br/>Local actions<br/>Data = Gold                                                    | AI Personas<br/>Voice Modes<br/>Screen Capture<br/>Camera + OCR                                                      |
+| **Chat**<br/>**Call**<br/>**Beam**<br/>**Draw**, ...                                                          | Local & Cloud<br/>Open & Closed<br/>Cheap & Heavy<br/>Google, Mistral, ...                                              | Attachments<br/>Diagrams<br/>Multi-Chat<br/>Mobile-first UI                                                          | Stored Locally<br/>Easy self-Host<br/>Local actions<br/>Data = Gold                                                    | AI Personas<br/>Voice Modes<br/>Screen Capture<br/>Camera + OCR                                                      |
 
 You can easily configure 100s of AI models in com-chat:
 
@@ -92,3 +96,5 @@ next start --port 3000
 ```
 
 The app will be running on the specified port, e.g. `http://localhost:3000`.
+
+2023-2024 · Smart x [com-chat](https://comchat.io) · License: [MIT](LICENSE) · Made with 💙
