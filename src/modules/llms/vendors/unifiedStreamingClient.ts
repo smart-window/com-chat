@@ -60,7 +60,7 @@ export async function unifiedStreamingClient<TSourceSetup = unknown, TLLMOptions
   // connect to the server-side streaming endpoint
   const response = await frontendSideFetch('/api/llms/stream', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.NEXT_PUBLIC_SECRET}` },
     body: JSON.stringify(input),
     signal: abortSignal,
   });

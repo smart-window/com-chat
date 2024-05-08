@@ -21,6 +21,7 @@ const enableLoggerLink = (opts: any) => {
     (opts.direction === 'down' && opts.result instanceof Error);
 };
 
+const headers = { 'Authorization': `Bearer ${process.env.NEXT_PUBLIC_SECRET}` }
 
 /**
  * Typesafe React Query hooks for the tRPC Edge-Runtime API
@@ -44,6 +45,7 @@ export const apiQuery = createTRPCNext<AppRouterEdge>({
         loggerLink({ enabled: enableLoggerLink }),
         httpBatchLink({
           url: `${getBaseUrl()}/api/trpc-edge`,
+          headers: headers
         }),
       ],
     };
@@ -66,6 +68,7 @@ export const apiAsync = createTRPCProxyClient<AppRouterEdge>({
     loggerLink({ enabled: enableLoggerLink }),
     httpLink({
       url: `${getBaseUrl()}/api/trpc-edge`,
+      headers: headers
     }),
   ],
 });
@@ -80,6 +83,7 @@ export const apiAsyncNode = createTRPCProxyClient<AppRouterNode>({
     loggerLink({ enabled: enableLoggerLink }),
     httpLink({
       url: `${getBaseUrl()}/api/trpc-node`,
+      headers: headers
     }),
   ],
 });
