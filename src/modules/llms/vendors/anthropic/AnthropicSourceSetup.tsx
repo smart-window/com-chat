@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { Alert } from '@mui/joy';
 
-import { FormInputKey } from '~/common/components/forms/FormInputKey';
+import { ExternalLink } from '~/common/components/ExternalLink';
 import { FormTextField } from '~/common/components/forms/FormTextField';
 import { InlineError } from '~/common/components/InlineError';
 import { Link } from '~/common/components/Link';
@@ -10,7 +10,7 @@ import { SetupFormRefetchButton } from '~/common/components/forms/SetupFormRefet
 import { useToggleableBoolean } from '~/common/util/useToggleableBoolean';
 
 import { DModelSourceId } from '../../store-llms';
-import { useLlmUpdateModels } from '../useLlmUpdateModels';
+import { useLlmUpdateModels } from '../../llm.client.hooks';
 import { useSourceSetup } from '../useSourceSetup';
 
 import { isValidAnthropicApiKey, ModelVendorAnthropic } from './anthropic.vendor';
@@ -34,17 +34,18 @@ export function AnthropicSourceSetup(props: { sourceId: DModelSourceId }) {
 
   // fetch models
   const { isFetching, refetch, isError, error } =
-    useLlmUpdateModels(ModelVendorAnthropic, access, !sourceHasLLMs && shallFetchSucceed, source);
+    useLlmUpdateModels(!sourceHasLLMs && shallFetchSucceed, source);
 
   return <>
 
     <Alert variant='soft' color='success'>
       <div>
-        Note: <strong>Claude-3</strong> models are now supported.
+        Enjoy <b>Opus</b>, <b>Sonnet</b> and <b>Haiku</b>. Anthropic <ExternalLink level='body-sm' href='https://status.anthropic.com/'>server status</ExternalLink>.
       </div>
     </Alert>
 
     {advanced.on && <FormTextField
+      autoCompleteId='anthropic-host'
       title='API Host'
       description={<>e.g., <Link level='body-sm' href='https://github.com/smart-window/com-chat/blob/main/docs/config-aws-bedrock.md' target='_blank'>bedrock-claude</Link></>}
       placeholder='deployment.service.region.amazonaws.com'
@@ -54,6 +55,7 @@ export function AnthropicSourceSetup(props: { sourceId: DModelSourceId }) {
     />}
 
     {advanced.on && <FormTextField
+      autoCompleteId='anthropic-helicone-key'
       title='Helicone Key' disabled={!!anthropicHost}
       description={<>Generate <Link level='body-sm' href='https://www.helicone.ai/keys' target='_blank'>here</Link></>}
       placeholder='sk-...'

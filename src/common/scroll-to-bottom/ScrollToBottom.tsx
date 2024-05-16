@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Smart
+ * Copyright (c) 2023-2024 Liam Lai
  *
  * This subsystem is responsible for 'snap-to-bottom' and 'scroll-to-bottom' features,
  * with an animated, gradual scroll.

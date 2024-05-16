@@ -72,14 +72,28 @@ export function anthropicMessagesPayloadOrThrow(model: OpenAIModelSchema, histor
   if (history[0]?.role === 'system' && history.length > 1)
     systemPrompt = history.shift()?.content;
 
-  // Transform the OpenAIHistorySchema into the target messages format, ensuring that roles alternate between 'user' and 'assistant's
+  // Transform the OpenAIHistorySchema into the target messages format, ensuring that roles alternate between 'user' and 'assistant'
   const messages = history.reduce(
     (acc, historyItem, index) => {
+
+      // skip empty messages
+      if (!historyItem.content.trim()) return acc;
 
       const lastMessage: AnthropicWireMessagesRequest['messages'][number] | undefined = acc[acc.length - 1];
       const anthropicRole = historyItem.role === 'assistant' ? 'assistant' : 'user';
 
       if (index === 0 || anthropicRole !== lastMessage?.role) {
+
+        // Hack/Hotfix: if the first role is 'assistant', then prepend a user message otherwise the API call will break;
+        //              but what should we really do here?
+        if (index === 0 && anthropicRole === 'assistant') {
+          if (systemPrompt) {
+            // This stinks, as it will duplicate the system prompt; it's the best we can do for now for a better UX
+            acc.push({ role: 'user', content: [{ type: 'text', text: systemPrompt }] });
+          } else
+            throw new Error('The first message in the chat history must be a user message and not an assistant message.');
+        }
+
         // Add a new message object if the role is different from the previous message
         acc.push({
           role: anthropicRole,

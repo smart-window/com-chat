@@ -117,7 +117,7 @@ export function OptimaLayoutProvider(props: { children: React.ReactNode }) {
 
     openAPI: () => setState(state => ({ ...state, showAPI: true })),
     closeAPI: () => setState(state => ({ ...state, showAPI: false })),
-    
+
     openLlmOptions: (id: DLLMId) => setState(state => ({ ...state, showLlmOptions: id })),
     closeLlmOptions: () => setState(state => ({ ...state, showLlmOptions: null })),
 

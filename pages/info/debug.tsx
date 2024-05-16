@@ -17,7 +17,7 @@ import { Brand } from '~/common/app.config';
 import { ROUTE_APP_CHAT, ROUTE_INDEX } from '~/common/app.routes';
 
 // apps access
-import { incrementalNewsVersion } from '../../src/apps/news/news.version';
+import { incrementalNewsVersion, useAppNewsStateStore } from '../../src/apps/news/news.version';
 
 // capabilities access
 import { useCapabilityBrowserSpeechRecognition, useCapabilityElevenLabs, useCapabilityTextToImage } from '~/common/components/useCapabilities';
@@ -32,6 +32,7 @@ import { useUXLabsStore } from '~/common/state/store-ux-labs';
 // utils access
 import { clientHostName, isChromeDesktop, isFirefox, isIPhoneUser, isMacUser, isPwa, isVercelFromFrontend } from '~/common/util/pwaUtils';
 import { getGA4MeasurementId } from '~/common/components/GoogleAnalytics';
+import { prettyTimestampForFilenames } from '~/common/util/timeUtils';
 import { supportsClipboardRead } from '~/common/util/clipboardUtils';
 import { supportsScreenCapture } from '~/common/util/screenCaptureUtils';
 
@@ -80,7 +81,8 @@ function AppDebug() {
   const chatsCount = useChatStore.getState().conversations?.length;
   const uxLabsExperiments = Object.entries(useUXLabsStore.getState()).filter(([_k, v]) => v === true).map(([k, _]) => k).join(', ');
   const { folders, enableFolders } = useFolderStore.getState();
-  const { lastSeenNewsVersion, usageCount } = useAppStateStore.getState();
+  const { lastSeenNewsVersion } = useAppNewsStateStore.getState();
+  const { usageCount } = useAppStateStore.getState();
 
 
   // derived state
@@ -127,7 +129,7 @@ function AppDebug() {
   const handleDownload = async () => {
     fileSave(
       new Blob([JSON.stringify({ client: cClient, agi: cProduct, backend: cBackend }, null, 2)], { type: 'application/json' }),
-      { fileName: `com-chat-debug-${new Date().toISOString().replace(/:/g, '-')}.json`, extensions: ['.json'] },
+      { fileName: `com-chat_debug_${prettyTimestampForFilenames()}.json`, extensions: ['.json'] },
     )
       .then(() => setSaved(true))
       .catch(e => console.error('Error saving debug.json', e));

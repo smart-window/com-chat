@@ -1,4 +1,6 @@
-import { DLLMId, getKnowledgeMapCutoff } from '~/modules/llms/store-llms';
+import { DLLMId, findLLMOrThrow } from '~/modules/llms/store-llms';
+
+import { browserLangOrUS } from '~/common/util/pwaUtils';
 
 /*type Variables =
   | '{{Today}}'
@@ -48,10 +50,9 @@ export function bareBonesPromptMixer(_template: string, assistantLlmId: DLLMId |
 
   // {{LocaleNow}} - enough information to get on the same page with the user
   if (mixed.includes('{{LocaleNow}}')) {
-    const userLocale = navigator.language || 'en-US';
     // const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
     // Format the current date and time according to the user's locale and timezone
-    const formatter = new Intl.DateTimeFormat(userLocale, {
+    const formatter = new Intl.DateTimeFormat(browserLangOrUS, {
       weekday: 'short', // Full name of the day of the week
       year: 'numeric', // Numeric year
       month: 'short', // Full name of the month
@@ -77,7 +78,13 @@ export function bareBonesPromptMixer(_template: string, assistantLlmId: DLLMId |
   mixed = mixed.replace('{{ToolBrowser0}}', 'Web browsing capabilities: Disabled');
 
   // {{Cutoff}} or remove the line
-  const varCutoff = getKnowledgeMapCutoff(assistantLlmId);
+  let varCutoff: string | undefined;
+  try {
+    if (assistantLlmId)
+      varCutoff = findLLMOrThrow(assistantLlmId).trainingDataCutoff;
+  } catch (e) {
+    // ignore...
+  }
   if (varCutoff)
     mixed = mixed.replaceAll('{{Cutoff}}', varCutoff);
   else

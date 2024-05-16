@@ -2,8 +2,9 @@ import * as React from 'react';
 import { useShallow } from 'zustand/react/shallow';
 
 import type { SxProps, VariantProp } from '@mui/joy/styles/types';
-import { Box, Button, Typography, useTheme } from '@mui/joy';
+import { Alert, Box, Button, Typography, useTheme } from '@mui/joy';
 import AddCircleOutlineRoundedIcon from '@mui/icons-material/AddCircleOutlineRounded';
+import LanguageIcon from '@mui/icons-material/Language';
 
 import { Fusion } from './Fusion';
 import { findFusionFactory, FusionFactorySpec } from './instructions/beam.gather.factories';
@@ -11,6 +12,7 @@ import { findFusionFactory, FusionFactorySpec } from './instructions/beam.gather
 import { BeamCard, beamCardClasses } from '../BeamCard';
 import { BeamStoreApi, useBeamStore } from '../store-beam.hooks';
 import { GATHER_COLOR } from '../beam.config';
+import { browserLangNotUS } from '~/common/util/pwaUtils';
 
 
 const fusionGridDesktopSx: SxProps = {
@@ -143,11 +145,24 @@ export function BeamFusionGrid(props: {
             </Typography>
 
           </Box> : (
-            <Typography level='body-sm'>
-              You need two or more replies for a {currentFactory?.shortLabel?.toLocaleLowerCase() ?? ''} merge.
+            <Typography level='body-sm' sx={{ opacity: 0.8 }}>
+              {/*You need two or more replies for a {currentFactory?.shortLabel?.toLocaleLowerCase() ?? ''} merge.*/}
+              Waiting for multiple responses.
             </Typography>
           )}
         </BeamCard>
+      )}
+
+      {/* Full-width warning if not */}
+      {browserLangNotUS && (
+        <Alert color='warning' sx={{
+          // full row of the grid
+          gridColumn: '1 / -1',
+        }}>
+          <Typography level='body-sm' color='warning' startDecorator={<LanguageIcon />}>
+            Note: Merges are defined in English and have not been translated to your browser language ({navigator.language}) yet.
+          </Typography>
+        </Alert>
       )}
 
       {/* Pad items: N * <Box/> */}

@@ -1,4 +1,4 @@
-# com-chat 🧠✨
+# Com Chat 🧠✨
 
 Welcome to com-chat, the AI suite for professionals that need function, form,
 simplicity, and speed. Powered by the latest models from 12 vendors and
@@ -8,8 +8,6 @@ and [Calls](https://github.com/smart-window/com-chat/issues/354) with AI persona
 visualizations, coding, drawing, side-by-side chatting, and more -- all wrapped in a polished UX.
 
 Stay ahead of the curve with com-chat. 🚀 Pros & Devs love com-chat. 🤖
-
-Or fork & run on Vercel
 
 ## 👉 Key Features ✨
 
@@ -55,46 +53,3 @@ Add extra functionality with these integrations:
 [//]: # (- [x] **Open Roadmap**: Contribute to the progress of com-chat)
 
 <br/>
-
-# 🧩 Develop
-
-[//]: # (![TypeScript]&#40;https://img.shields.io/badge/TypeScript-007ACC?style=&logo=typescript&logoColor=white&#41;)
-
-[//]: # (![React]&#40;https://img.shields.io/badge/React-61DAFB?style=&logo=react&logoColor=black&#41;)
-
-[//]: # (![Next.js]&#40;https://img.shields.io/badge/Next.js-000000?style=&logo=vercel&logoColor=white&#41;)
-
-To download and run this Typescript/React/Next.js project locally, the only prerequisite is Node.js with the `npm` package manager.
-Clone this repo, install the dependencies (all local), and run the development server (which auto-watches the
-files for changes):
-
-```bash
-git clone https://github.com/smart-window/com-chat.git
-cd com-chat
-npm install
-npm run dev
-
-# You will see something like:
-#
-#  ▲ Next.js 14.1.0
-#  - Local: http://localhost:3000
-#  ✓ Ready in 2.6s
-```
-
-The development app will be running on `http://localhost:3000`. Development builds have the advantage of not requiring
-a build step, but can be slower than production builds. Also, development builds won't have timeout on edge functions.
-
-## 🛠️ Deploy from source
-
-The _production_ build of the application is optimized for performance and is performed by the `npm run build` command,
-after installing the required dependencies.
-
-```bash
-# .. repeat the steps above up to `npm install`, then:
-npm run build
-next start --port 3000
-```
-
-The app will be running on the specified port, e.g. `http://localhost:3000`.
-
-2023-2024 · Smart x [com-chat](https://comchat.io) · License: [MIT](LICENSE) · Made with 💙

@@ -10,6 +10,7 @@ import StayPrimaryPortraitIcon from '@mui/icons-material/StayPrimaryPortrait';
 
 import { getBackendCapabilities } from '~/modules/backend/store-backend-capabilities';
 
+import { AlreadySet } from '~/common/components/AlreadySet';
 import { FormInputKey } from '~/common/components/forms/FormInputKey';
 import { FormLabelStart } from '~/common/components/forms/FormLabelStart';
 import { FormRadioControl } from '~/common/components/forms/FormRadioControl';
@@ -79,8 +80,8 @@ export function ProdiaSettings(props: { noSkipKey?: boolean }) {
   return <>
 
     {!backendHasProdia && !!props.noSkipKey && <FormInputKey
-      id='prodia-key' label='Prodia API Key'
-      rightLabel={backendHasProdia ? '✔️ already set in server' : 'required'}
+      autoCompleteId='prodia-key' label='Prodia API Key'
+      rightLabel={<AlreadySet required={!backendHasProdia} />}
       value={apiKey} onChange={setApiKey}
       required={!backendHasProdia} isError={!isValidKey}
     />}

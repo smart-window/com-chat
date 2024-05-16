@@ -22,6 +22,7 @@ import { useOptimaDrawers } from './useOptimaDrawers';
 import { useOptimaLayout } from './useOptimaLayout';
 import firebase from '../../../../config/firebase';
 
+
 const PageBarItemsFallback = (props: { currentApp?: NavItemApp }) =>
   <Box sx={{
     display: 'flex',
@@ -71,6 +72,7 @@ function CommonPageMenuItems(props: { onClose: () => void }) {
 
     {/* Preferences |...| Dark Mode Toggle */}
     {/*<Tooltip title={<KeyStroke combo='Ctrl + Shift + P' />}>*/}
+
     <MenuItem onClick={handleSignOut}>
       <ListItemDecorator><LogoutIcon /></ListItemDecorator>
       Sign Out
@@ -118,6 +120,11 @@ export function PageBar(props: { component: React.ElementType, currentApp?: NavI
   const commonPageMenuItems = React.useMemo(() => {
     return <CommonPageMenuItems onClose={closePageMenu} />;
   }, [closePageMenu]);
+
+  const handlePageContextMenu = React.useCallback((event: React.MouseEvent) => {
+    event.preventDefault(); // added for the Right mouse click (to prevent the menu)
+    openPageMenu();
+  }, [openPageMenu]);
 
   // [Desktop] hide the app bar if the current app doesn't use it
   const desktopHide = !!props.currentApp?.hideBar && !props.isMobile;
@@ -176,7 +183,12 @@ export function PageBar(props: { component: React.ElementType, currentApp?: NavI
 
       {/* Page Menu Anchor */}
       <InvertedBarCornerItem>
-        <IconButton disabled={!pageMenuAnchor /*|| (!appMenuItems && !props.isMobile)*/} onClick={openPageMenu} ref={pageMenuAnchor}>
+        <IconButton
+          ref={pageMenuAnchor}
+          disabled={!pageMenuAnchor /*|| (!appMenuItems && !props.isMobile)*/}
+          onClick={openPageMenu}
+          onContextMenu={handlePageContextMenu}
+        >
           <MoreVertIcon />
         </IconButton>
       </InvertedBarCornerItem>

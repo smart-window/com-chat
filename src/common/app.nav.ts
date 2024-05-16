@@ -8,8 +8,6 @@ import AutoAwesomeOutlinedIcon from '@mui/icons-material/AutoAwesomeOutlined';
 import CallIcon from '@mui/icons-material/Call';
 import CallOutlinedIcon from '@mui/icons-material/CallOutlined';
 import Diversity2Icon from '@mui/icons-material/Diversity2';
-import EventNoteIcon from '@mui/icons-material/EventNote';
-import EventNoteOutlinedIcon from '@mui/icons-material/EventNoteOutlined';
 import FormatPaintOutlinedIcon from '@mui/icons-material/FormatPaintOutlined';
 import FormatPaintTwoToneIcon from '@mui/icons-material/FormatPaintTwoTone';
 import ImageIcon from '@mui/icons-material/Image';
@@ -21,7 +19,6 @@ import TextsmsOutlinedIcon from '@mui/icons-material/TextsmsOutlined';
 import WorkspacesIcon from '@mui/icons-material/Workspaces';
 import WorkspacesOutlinedIcon from '@mui/icons-material/WorkspacesOutlined';
 // Link icons
-import GitHubIcon from '@mui/icons-material/GitHub';
 import { DiscordIcon } from '~/common/components/icons/3rdparty/DiscordIcon';
 // Modal icons
 import BuildCircleIcon from '@mui/icons-material/BuildCircle';

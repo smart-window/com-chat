@@ -194,7 +194,7 @@ function prodiaAccess(_prodiaKey: string | undefined, apiPath: string): { header
   // API key
   const prodiaKey = (_prodiaKey || env.PRODIA_API_KEY || '').trim();
   if (!prodiaKey)
-    throw new Error('Missing Prodia API Key. Contact server admin on discord.');
+    throw new Error('Missing Prodia API Key. Add it on the UI (Setup) or server side (your deployment).');
 
   // API host
   const prodiaHost = 'https://api.prodia.com';

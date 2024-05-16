@@ -8,13 +8,13 @@ import { Link } from '~/common/components/Link';
 
 
 export const beamReleaseDate = '2024-04-01T22:00:00Z';
-export const beamBlogUrl = 'https://comchat.io/blog/beam-multi-model-ai-reasoning/';
+export const beamBlogUrl = 'https://com-chat.io/blog/beam-multi-model-ai-reasoning/';
 
 export const beamNewsCallout =
   <Card variant='solid' invertedColors>
     <CardContent sx={{ gap: 2 }}>
       <Typography level='title-lg'>
-        Beam - just launched in 1.15
+        Beam - launched in 1.15
       </Typography>
       <Typography level='body-sm'>
         Beam is a world-first, multi-model AI chat modality that accelerates the discovery of superior solutions by leveraging the collective strengths of diverse LLMs.

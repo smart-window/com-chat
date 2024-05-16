@@ -3,6 +3,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 import type { ContentScaling } from '~/common/app.theme';
+import { browserLangOrUS } from '~/common/util/pwaUtils';
 
 
 // UI Preferences
@@ -31,6 +32,9 @@ interface UIPreferencesStore {
   renderMarkdown: boolean;
   setRenderMarkdown: (renderMarkdown: boolean) => void;
 
+  renderCodeSoftWrap: boolean;
+  setRenderCodeSoftWrap: (renderCodeSoftWrap: boolean) => void;
+
   // showPersonaExamples: boolean;
   // setShowPersonaExamples: (showPersonaExamples: boolean) => void;
 
@@ -54,7 +58,7 @@ export const useUIPreferencesStore = create<UIPreferencesStore>()(
 
       // UI Features
 
-      preferredLanguage: (typeof navigator !== 'undefined') && navigator.language || 'en-US',
+      preferredLanguage: browserLangOrUS,
       setPreferredLanguage: (preferredLanguage: string) => set({ preferredLanguage }),
 
       centerMode: 'wide',
@@ -73,6 +77,9 @@ export const useUIPreferencesStore = create<UIPreferencesStore>()(
 
       renderMarkdown: true,
       setRenderMarkdown: (renderMarkdown: boolean) => set({ renderMarkdown }),
+
+      renderCodeSoftWrap: false,
+      setRenderCodeSoftWrap: (renderCodeSoftWrap: boolean) => set({ renderCodeSoftWrap }),
 
       // showPersonaExamples: false,
       // setShowPersonaExamples: (showPersonaExamples: boolean) => set({ showPersonaExamples }),

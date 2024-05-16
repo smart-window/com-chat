@@ -1,21 +1,13 @@
-import * as React from 'react';
-
 import { Typography } from '@mui/joy';
 
-import { FormInputKey } from '~/common/components/forms/FormInputKey';
 import { InlineError } from '~/common/components/InlineError';
-import { Link } from '~/common/components/Link';
 import { SetupFormRefetchButton } from '~/common/components/forms/SetupFormRefetchButton';
 
 import { DModelSourceId } from '../../store-llms';
-import { useLlmUpdateModels } from '../useLlmUpdateModels';
+import { useLlmUpdateModels } from '../../llm.client.hooks';
 import { useSourceSetup } from '../useSourceSetup';
 
 import { ModelVendorMistral } from './mistral.vendor';
-
-
-const MISTRAL_REG_LINK = 'https://console.mistral.ai/';
-
 
 export function MistralSourceSetup(props: { sourceId: DModelSourceId }) {
 
@@ -27,11 +19,10 @@ export function MistralSourceSetup(props: { sourceId: DModelSourceId }) {
   const { oaiKey: mistralKey } = access;
 
   const shallFetchSucceed = !needsUserKey || (!!mistralKey && sourceSetupValid);
-  const showKeyError = !!mistralKey && !sourceSetupValid;
 
   // fetch models
   const { isFetching, refetch, isError, error } =
-    useLlmUpdateModels(ModelVendorMistral, access, !sourceHasLLMs && shallFetchSucceed, source);
+    useLlmUpdateModels(!sourceHasLLMs && shallFetchSucceed, source);
 
   return <>
 
