@@ -8,7 +8,7 @@ import { Link } from '~/common/components/Link';
 
 
 export const beamReleaseDate = '2024-04-01T22:00:00Z';
-export const beamBlogUrl = 'https://com-chat.io/blog/beam-multi-model-ai-reasoning/';
+export const beamBlogUrl = 'https://comchat.io/blog/beam-multi-model-ai-reasoning/';
 
 export const beamNewsCallout =
   <Card variant='solid' invertedColors>

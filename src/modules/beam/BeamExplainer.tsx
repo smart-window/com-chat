@@ -17,7 +17,7 @@ const beamSteps: ExplainerPage[] = [
     // titleSuffix: ' azing',
     // titleSquircle: true,
     mdContent: `
-**Beam** is a chat modality in com-chat to engage multiple AI models, [together](https://com-chat.io/blog/beam-multi-model-ai-reasoning). 
+**Beam** is a chat modality in com-chat to engage multiple AI models, [together](https://comchat.io/blog/beam-multi-model-ai-reasoning). 
  
 It's like having a brainstorm session with several smart people,
 each adding their own unique perspective.
@@ -66,7 +66,7 @@ Experiment with different options to find the one that works best for your chat.
 //     mdContent: `
 // #### Human as a Judge
 // You, the user, provide creative direction and final judgement. The AI models are powerful tools that generate drafts for you to quickly evaluate and refine.
-// There are profound reasons why this approach works, which we explore [in our blog](https://com-chat.io/blog/introducing-beam).
+// There are profound reasons why this approach works, which we explore [in our blog](https://comchat.io/blog/introducing-beam).
 //
 // #### Best Use
 // This tool is designed for the **early stages** of a process, where it delivers unparalleled insights and perspectives precisely **when your

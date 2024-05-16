@@ -18,13 +18,13 @@ export const Brand = {
     TwitterSite: '@comchat_io',
   },
   URIs: {
-    Home: 'https://com-chat.io',
-    // App: 'https://get.com-chat.io',
-    CardImage: 'https://com-chat.io/icons/card-dark-1200.png',
+    Home: 'https://comchat.io',
+    // App: 'https://get.comchat.io',
+    CardImage: 'https://comchat.io/icons/card-dark-1200.png',
     OpenRepo: 'https://github.com/smart-window/com-chat',
     OpenProject: 'https://github.com/users/smart_window/projects/4',
     SupportInvite: 'https://discord.gg/communeai',
     // Twitter: 'https://www.twitter.com/comchat_io',
-    PrivacyPolicy: 'https://com-chat.io/privacy',
+    PrivacyPolicy: 'https://comchat.io/privacy',
   },
 } as const;
