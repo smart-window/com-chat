@@ -21,6 +21,8 @@ import { ProviderTRPCQuerySettings } from '~/common/providers/ProviderTRPCQueryS
 import { ProviderTheming } from '~/common/providers/ProviderTheming';
 import { hasGoogleAnalytics, OptionalGoogleAnalytics } from '~/common/components/GoogleAnalytics';
 import { isVercelFromFrontend } from '~/common/util/pwaUtils';
+import { ToastProvider } from "~/hooks/toast";
+import { PolkadotProvider } from "~/hooks/polkadot";
 
 
 const MyApp = ({ Component, emotionCache, pageProps }: MyAppProps) =>
@@ -38,7 +40,11 @@ const MyApp = ({ Component, emotionCache, pageProps }: MyAppProps) =>
             {/* ^ SSR boundary */}
             <ProviderBootstrapLogic>
               <ProviderSnacks>
-                <Component {...pageProps} />
+                <PolkadotProvider wsEndpoint={process.env.NEXT_PUBLIC_WS_PROVIDER_URL || ""}>
+                  <ToastProvider>
+                    <Component {...pageProps} />
+                  </ToastProvider>
+                </PolkadotProvider>
               </ProviderSnacks>
             </ProviderBootstrapLogic>
           </ProviderBackendCapabilities>

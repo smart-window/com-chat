@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import type { SxProps } from '@mui/joy/styles/types';
-import { Box, IconButton, ListDivider, ListItemDecorator, MenuItem, Typography, useColorScheme } from '@mui/joy';
+import { Box, IconButton, ListDivider, ListItemDecorator, MenuItem, Button, Typography, useColorScheme } from '@mui/joy';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
@@ -9,12 +9,15 @@ import MenuIcon from '@mui/icons-material/Menu';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/Logout';
+import WalletOutlinedIcon from '@mui/icons-material/WalletOutlined';
 
 import { checkVisibleNav, NavItemApp } from '~/common/app.nav';
 import { Brand } from '~/common/app.config';
 import { CloseableMenu } from '~/common/components/CloseableMenu';
 import { Link } from '~/common/components/Link';
 import { ROUTE_INDEX } from '~/common/app.routes';
+import { usePolkadot } from "~/hooks/polkadot";
+import { small_address } from "~/utils";
 
 import { InvertedBar, InvertedBarCornerItem } from './components/InvertedBar';
 import { MobileNavListItem } from './MobileNavListItem';
@@ -107,6 +110,7 @@ export function PageBar(props: { component: React.ElementType, currentApp?: NavI
   // state
   // const [value, setValue] = React.useState<ContainedAppType>('chat');
   const pageMenuAnchor = React.useRef<HTMLButtonElement>(null);
+  const { handleConnect, selectedAccount } = usePolkadot();
 
   // external state
   const {
@@ -180,6 +184,22 @@ export function PageBar(props: { component: React.ElementType, currentApp?: NavI
           : <PageBarItemsFallback currentApp={props.currentApp} />
         }
       </Box>
+
+      {selectedAccount ?
+        <Button
+          onClick={handleConnect}
+          startDecorator={<WalletOutlinedIcon />}
+          sx={{ height: 30 }}
+        >
+          <p>{small_address(selectedAccount.address)}</p>
+        </Button> :
+        <Button
+          onClick={handleConnect}
+          startDecorator={<WalletOutlinedIcon />}
+        >
+          Connect Wallet
+        </Button>
+      }
 
       {/* Page Menu Anchor */}
       <InvertedBarCornerItem>

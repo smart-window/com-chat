@@ -32,7 +32,8 @@
     "paths": {
       "~/common/*": ["src/common/*"],
       "~/modules/*": ["src/modules/*"],
-      "~/server/*": ["src/server/*"]
+      "~/server/*": ["src/server/*"],
+      "~/*": ["./src/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts",

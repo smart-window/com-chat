@@ -1,159 +1,313 @@
-import { useEffect, useState } from 'react';
+"use client";
 
-import { Alert, Box, Button, Divider, FormControl, FormLabel, Input, Typography } from '@mui/joy';
-import { GoodModal } from '~/common/components/GoodModal';
+import React, { useState } from "react";
+import Button from '@mui/joy/Button';
+import Divider from '@mui/joy/Divider';
+import DialogTitle from '@mui/joy/DialogTitle';
+import DialogContent from '@mui/joy/DialogContent';
+import Modal from '@mui/joy/Modal';
+import ModalDialog from '@mui/joy/ModalDialog';
+import WalletOutlinedIcon from '@mui/icons-material/WalletOutlined';
+import { format_token } from "~/utils";
+import { usePolkadot } from "~/hooks/polkadot";
+import { type TransactionStatus } from "~/types";
 import { useOptimaLayout } from '~/common/layout/optima/useOptimaLayout';
+import { Box, Input, Typography } from "@mui/joy";
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import LockOpenOutlinedIcon from '@mui/icons-material/LockOpenOutlined';
+import FormLabel from '@mui/joy/FormLabel';
+import Radio, { radioClasses } from '@mui/joy/Radio';
+import RadioGroup from '@mui/joy/RadioGroup';
+import Sheet from '@mui/joy/Sheet';
+import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded';
 
-import { sendRequest } from 'config/action';
-import { useFirebaseStore } from 'config/store-firebase';
-import { useWalletStore } from 'config/store-wallet';
-import { RenderCodeMemo } from '../../modules/blocks/code/RenderCode';
-import WalletIcon from '@mui/icons-material/Wallet';
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-import { addSnackbar } from '~/common/components/useSnackbarsStore';
+type MenuType =
+    | "stake"
+    | "unstake"
 
-export function WalletModal() {
+export const WalletModal = () => {
+    const {
+        stakeData,
+        selectedAccount,
+        balance,
+        isBalanceLoading,
+        handleConnect,
+        addStake,
+        removeStake,
+    } = usePolkadot();
 
-    // external state
     const {
         closeWallet,
         openWallet,
         showWallet,
     } = useOptimaLayout();
 
-    const [withdrawAddress, setWithdrawAddress] = useState("")
-    const [withdrawAmount, setWithdrawAmount] = useState<number>()
-    const [pendingWithdraw, setPendingWithdraw] = useState(false)
+    const [activeMenu, setActiveMenu] = useState<MenuType>("stake");
+    const validator = process.env.NEXT_PUBLIC_COMCHAT_ADDRESS || "";
+    const [amount, setAmount] = useState<string>("");
+    const netUid = 0;
 
-    const { idToken } = useFirebaseStore()
-    const { address, amount, setAmount, setAddress } = useWalletStore()
+    const [transactionStatus, setTransactionStatus] = useState<TransactionStatus>(
+        {
+            status: null,
+            message: null,
+            finalized: false,
+        },
+    );
 
-    useEffect(() => {
-        const get_wallet = async () => {
-            const response = await sendRequest({ method: "GET", url: "get-wallet", idToken })
-            setAddress(response.address)
-            setAmount(response.stake_amount)
-        }
+    const [inputError, setInputError] = useState<{
+        validator: string | null;
+        value: string | null;
+    }>({
+        validator: null,
+        value: null,
+    });
 
-        get_wallet()
-    }, [sendRequest])
+    const handleCallback = (callbackReturn: TransactionStatus) => {
+        setTransactionStatus(callbackReturn);
+    };
 
-    const withdraw = async () => {
-        setPendingWithdraw(true)
-        const response = await sendRequest({
-            url: "withdraw",
-            idToken,
-            body: { address: withdrawAddress, amount: withdrawAmount }
-        })
-        setPendingWithdraw(false)
-        
-        if (response.status === "success") {
-            // Show success notification
-            addSnackbar({
-                key: 'withdraw-success',
-                type: 'success',
-                message: 'Your withdraw has been approved.',
-                overrides: {
-                    autoHideDuration: 5000,
-                },
+    if (!selectedAccount) return null;
+
+    const handleMenuClick = (type: MenuType) => {
+        setAmount("");
+        setActiveMenu(type);
+    };
+
+    const handleCheckInput = () => {
+        setInputError({ validator: null, value: null });
+        if (!validator)
+            setInputError((prev) => ({
+                ...prev,
+                validator: "Validator Address cannot be empty",
+            }));
+        if (!amount)
+            setInputError((prev) => ({ ...prev, value: "Amount cannot be empty" }));
+        return !!(amount && validator);
+    };
+
+    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+
+        const isValidInput = handleCheckInput();
+
+        if (!isValidInput) return;
+
+        setTransactionStatus({
+            status: "STARTING",
+            finalized: false,
+            message: "Starting transaction...",
+        });
+
+        if (activeMenu === "stake") {
+            addStake({
+                validator,
+                amount,
+                netUid,
+                callback: handleCallback,
             });
-            setAmount(response.stake_amount) // Update balance
-        } else {
-            // Show error notification
-            addSnackbar({
-                key: 'withdraw-failed',
-                type: 'issue',
-                message: response.error,
-                // overrides: {
-                //     autoHideDuration: 5000,
-                // },
+        }
+        if (activeMenu === "unstake") {
+            removeStake({
+                validator,
+                amount,
+                netUid,
+                callback: handleCallback,
             });
         }
+    };
+
+    const buttons = [
+        {
+            text: "Stake",
+            handleMenuClick: (menuType: MenuType) => handleMenuClick(menuType),
+        },
+        {
+            text: "Unstake",
+            handleMenuClick: (menuType: MenuType) => handleMenuClick(menuType),
+        },
+    ];
+
+    let userStakeWeight: bigint | null = null;
+    if (stakeData != null && selectedAccount != null) {
+        const user_stake_entry = stakeData[selectedAccount.address]
+        userStakeWeight = user_stake_entry ?? 0n;
     }
 
-    return <>
-        {showWallet &&
-            <GoodModal
-                startButton={
+    return (
+        <Modal open={showWallet} onClose={closeWallet}>
+            <ModalDialog variant="outlined" role="alertdialog">
+                <DialogTitle>
+                    <WalletOutlinedIcon />
+                    My Wallet
+                </DialogTitle>
+                <Divider />
+                <DialogContent sx={{ gap: 2 }}>
                     <Button
-                        loading={pendingWithdraw}
-                        variant='solid'
-                        onClick={withdraw}
+                        onClick={handleConnect}
+                        variant="solid"
+                        color="neutral"
+                        size="lg"
                     >
-                        Withdraw
+                        {selectedAccount.address}
                     </Button>
-                }
-                title={<>My <b>Wallet</b></>}
-                open onClose={closeWallet}
-                sx={{
-                    overflow: 'auto',
-                }}
-            >
-                <Divider />
-                <Box>
-                    <Alert variant='soft' color='warning' sx={{ flexDirection: 'column', alignItems: 'start', mb: 2 }}>
-                        <Typography level='title-md' color='warning' sx={{ flexGrow: 1 }}>
-                            After you send your COM to below address, it will appear within 5 minutes
-                            <p>Emission will be added every 15 minutes</p>
-                            Our delegation fee is 0%
+                    <Box sx={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        justifyContent: "space-between"
+                    }}>
+                        <Typography>
+                            Your Balance:
                         </Typography>
-                    </Alert>
+                        {!isBalanceLoading ? (
+                            <Typography>{Math.round(balance)} COMAI</Typography>
+                        ) : (
+                            <Typography>
+                                Loading Balance Info
+                            </Typography>
+                        )}
+                    </Box>
+                    <Box sx={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        justifyContent: "space-between"
+                    }}>
+                        <Typography>
+                            Total Staked:
+                        </Typography>
+                        {userStakeWeight !== null ? (
+                            <Typography>{format_token(userStakeWeight)} COMAI</Typography>
+                        ) : (
+                            <Typography>
+                                Loading Staking Info
+                            </Typography>
+                        )}
+                    </Box>
+                    <RadioGroup
+                        aria-label="platform"
+                        defaultValue="Stake"
+                        overlay
+                        name="platform"
+                        sx={{
+                            flexDirection: 'row',
+                            gap: 2,
+                            [`& .${radioClasses.checked}`]: {
+                                [`& .${radioClasses.action}`]: {
+                                    inset: -1,
+                                    border: '3px solid',
+                                    borderColor: 'primary.500',
+                                },
+                            },
+                            [`& .${radioClasses.radio}`]: {
+                                display: 'contents',
+                                '& > svg': {
+                                    zIndex: 2,
+                                    position: 'absolute',
+                                    top: '-8px',
+                                    right: '-8px',
+                                    bgcolor: 'background.surface',
+                                    borderRadius: '50%',
+                                },
+                            },
+                        }}
+                    >
+                        {buttons.map((button) => (
+                            <Sheet
+                                onClick={() =>
+                                    button.handleMenuClick(button.text.toLowerCase() as MenuType)
+                                }
+                                key={button.text}
+                                variant="outlined"
+                                sx={{
+                                    borderRadius: 'md',
+                                    boxShadow: 'sm',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    gap: 1.5,
+                                    p: 2,
+                                    minWidth: 120,
+                                }}
+                            >
+                                <Radio id={button.text} value={button.text} checkedIcon={<CheckCircleRoundedIcon />} />
+                                {button.text === "Stake" ? <LockOutlinedIcon /> : <LockOpenOutlinedIcon />}
+                                <FormLabel htmlFor={button.text}>{button.text}</FormLabel>
+                            </Sheet>
+                        ))}
+                    </RadioGroup>
 
-                    {address &&
-                        <RenderCodeMemo
-                            sx={{
-                                backgroundColor: 'neutral.plainHoverBg',
-                                boxShadow: 'md',
-                                fontFamily: 'code',
-                                borderRadius: 'var(--joy-radius-sm)',
-                                mb: 2
-                            }}
-                            key='code-address'
-                            codeBlock={{
-                                blockCode: address,
-                                blockTitle: "Address",
-                                complete: true,
-                                type: "code"
-                            }} />
-                    }
-
-                    Your Balance: <b>{amount}</b> COM
-                </Box>
-
-                <Divider />
-
-                <Box>
-                    <FormControl sx={{ mb: 2 }}>
-                        <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'baseline', flexWrap: 'wrap', justifyContent: 'space-between' }}>
-                            <FormLabel>Withdraw Address</FormLabel>
+                    <form
+                        onSubmit={handleSubmit}
+                    >
+                        <Box sx={{
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: 2
+                        }}>
+                            <Box sx={{
+                                display: "flex",
+                                flexDirection: "column",
+                                gap: 1
+                            }}>
+                                <Typography>
+                                    ComChat Validator Address
+                                </Typography>
+                                <Input
+                                    type="text"
+                                    value={validator}
+                                    disabled
+                                />
+                            </Box>
+                            <Box sx={{
+                                display: "flex",
+                                flexDirection: "column",
+                                gap: 1
+                            }}>
+                                <Typography>Amount</Typography>
+                                <Input
+                                    type="number"
+                                    disabled={transactionStatus.status === "PENDING"}
+                                    value={amount}
+                                    onChange={(e) => setAmount(e.target.value)}
+                                    placeholder="The amount of COMAI to use in the transaction"
+                                />
+                            </Box>
+                            {inputError.value && (
+                                <p
+                                    className={`-mt-2 mb-1 flex text-left text-base text-red-400`}
+                                >
+                                    {inputError.value}
+                                </p>
+                            )}
+                            <Button
+                                className="w-full"
+                                loading={transactionStatus.status === "PENDING" || transactionStatus.status === "STARTING"}
+                                type="submit"
+                                variant="solid"
+                                color="danger"
+                                disabled={transactionStatus.status === "PENDING"}
+                            >
+                                Submit
+                            </Button>
                         </Box>
-                        <Input
-                            id="withdraw-address"
-                            variant={'outlined'}
-                            value={withdrawAddress}
-                            onChange={e => { setWithdrawAddress(e.target.value) }}
-                            placeholder="ss58 Address"
-                            type='text'
-                            startDecorator={<WalletIcon />}
-                        />
-                    </FormControl>
+                    </form>
+                    {transactionStatus.status && (
+                        <Typography
+                            color={
+                                transactionStatus.status === "PENDING" ? "warning" :
+                                    transactionStatus.status === "ERROR" ? "danger" :
+                                        transactionStatus.status === "SUCCESS" ? "success" :
+                                            transactionStatus.status === "STARTING" ? "primary" : "primary"
+                            }
+                        >
+                            {(transactionStatus.status === "PENDING" ||
+                                transactionStatus.status === "STARTING") && <></>}
+                            {transactionStatus.message}
+                        </Typography>
+                    )}
 
-                    <FormControl>
-                        <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'baseline', flexWrap: 'wrap', justifyContent: 'space-between' }}>
-                            <FormLabel>Amount</FormLabel>
-                        </Box>
-                        <Input
-                            id="withdraw-amount"
-                            variant={'outlined'}
-                            value={withdrawAmount}
-                            onChange={e => { setWithdrawAmount(Number(e.target.value)) }}
-                            placeholder="Amount"
-                            type='number'
-                            startDecorator={<AttachMoneyIcon />}
-                        />
-                    </FormControl>
-                </Box>
-
-            </GoodModal>}
-    </>;
-}
+                </DialogContent>
+            </ModalDialog>
+        </Modal>
+    );
+};
