@@ -8,10 +8,10 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     <>
       <ToastContainer
         position="top-right"
-        theme="dark"
+        theme="colored"
         hideProgressBar={false}
         newestOnTop={false}
-        autoClose={4000}
+        autoClose={5000}
         rtl={false}
         pauseOnFocusLoss
         closeOnClick

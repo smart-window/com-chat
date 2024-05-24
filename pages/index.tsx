@@ -1,32 +1,14 @@
-import { useEffect, useState } from 'react';
-import firebase from '../config/firebase';
+import * as React from 'react';
 
-import SignInPage from './signin';
-import ChatPage from './chat';
+import { AppChat } from '../src/apps/chat/AppChat';
 
-import { useFirebaseStore } from '../config/store-firebase';
+import { withLayout } from '~/common/layout/withLayout';
+
 
 export default function IndexPage() {
 
-  const [isSignedIn, setIsSignedIn] = useState(false); // Local signed-in state.
-  const { setIdToken } = useFirebaseStore()
+  // TODO: This Index page will point to the Dashboard (or a landing page)
+  // For now it offers the chat experience, but this will change. #299
 
-  // Listen to the Firebase Auth state and set the local state.
-  useEffect(() => {
-    const unregisterAuthObserver = firebase.auth().onAuthStateChanged(async user => {
-      if (user) {
-        const idToken = await user.getIdToken();
-        setIdToken(idToken)
-      }
-      setIsSignedIn(!!user);
-    });
-    return () => unregisterAuthObserver(); // Make sure we un-register Firebase observers when the component unmounts.
-  }, []);
-
-  if (!isSignedIn) {
-    return <SignInPage />
-  }
-  return (
-    <ChatPage />
-  );
+  return withLayout({ type: 'optima' }, <AppChat />);
 }

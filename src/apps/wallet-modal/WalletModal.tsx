@@ -20,6 +20,7 @@ import Radio, { radioClasses } from '@mui/joy/Radio';
 import RadioGroup from '@mui/joy/RadioGroup';
 import Sheet from '@mui/joy/Sheet';
 import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded';
+import { env } from '~/server/env.mjs';
 
 type MenuType =
     | "stake"
@@ -43,7 +44,7 @@ export const WalletModal = () => {
     } = useOptimaLayout();
 
     const [activeMenu, setActiveMenu] = useState<MenuType>("stake");
-    const validator = process.env.NEXT_PUBLIC_COMCHAT_ADDRESS || "";
+    const validator = env.NEXT_PUBLIC_COMCHAT_ADDRESS;
     const [amount, setAmount] = useState<string>("");
     const netUid = 0;
 

@@ -23,7 +23,7 @@ import { hasGoogleAnalytics, OptionalGoogleAnalytics } from '~/common/components
 import { isVercelFromFrontend } from '~/common/util/pwaUtils';
 import { ToastProvider } from "~/hooks/toast";
 import { PolkadotProvider } from "~/hooks/polkadot";
-
+import { env } from '~/server/env.mjs';
 
 const MyApp = ({ Component, emotionCache, pageProps }: MyAppProps) =>
   <>
@@ -40,7 +40,7 @@ const MyApp = ({ Component, emotionCache, pageProps }: MyAppProps) =>
             {/* ^ SSR boundary */}
             <ProviderBootstrapLogic>
               <ProviderSnacks>
-                <PolkadotProvider wsEndpoint={process.env.NEXT_PUBLIC_WS_PROVIDER_URL || ""}>
+                <PolkadotProvider wsEndpoint={env.NEXT_PUBLIC_WS_PROVIDER_URL}>
                   <ToastProvider>
                     <Component {...pageProps} />
                   </ToastProvider>

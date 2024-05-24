@@ -2,6 +2,7 @@ import "@polkadot/api-augment";
 import { toast } from "react-toastify";
 import { type GetBalance } from "~/types";
 import { type ApiPromise } from "@polkadot/api";
+import { env } from '~/server/env.mjs';
 
 // == Addresses ==
 export const small_address = (address: string) =>
@@ -171,13 +172,13 @@ export async function get_all_stake_out(api: ApiPromise) {
 }
 
 export async function get_stake_out(api: ApiPromise) {
-  const module = 'subspaceModule';
+  const moduleName = 'subspaceModule';
   const storageFunction = 'stakeFrom';
 
-  const params = [0, process.env.NEXT_PUBLIC_COMCHAT_ADDRESS];  // the 0 is netuid, the rest is the key
+  const params = [0, env.NEXT_PUBLIC_COMCHAT_ADDRESS];  // the 0 is netuid, the rest is the key
 
   try {
-    const result = await api.query[module][storageFunction](...params);
+    const result = await api.query[moduleName][storageFunction](...params);
     const data = result.toHuman() as {
       [key: string]: string;
     }

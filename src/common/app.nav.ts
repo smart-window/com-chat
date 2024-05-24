@@ -194,12 +194,6 @@ export const navItems: {
   // Modals
   modals: [
     {
-      name: 'API',
-      icon: ApiIcon,
-      type: 'modal',
-      overlayId: 'api',
-    },
-    {
       name: 'Wallet',
       icon: WalletIcon,
       type: 'modal',

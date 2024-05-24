@@ -61,7 +61,12 @@ export async function unifiedStreamingClient<TSourceSetup = unknown, TLLMOptions
   const timeFetch = performance.now();
   const response = await frontendSideFetch('/api/llms/stream', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'address': localStorage.getItem('walletAddress') || '',
+      'signature': localStorage.getItem('walletSignature') || '',
+      'message': localStorage.getItem('signMessage') || '',
+    },
     body: JSON.stringify(input),
     signal: abortSignal,
   });

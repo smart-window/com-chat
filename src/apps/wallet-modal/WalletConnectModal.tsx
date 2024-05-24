@@ -110,7 +110,7 @@ export const WalletConnectModal = ({
                       Please install a Wallet extension or check permission settings.
                     </Typography>
                     <Typography level="body-md">
-                      If you don't have a wallet, we recommend one of these:
+                      If you don&apos;t have a wallet, we recommend one of these:
                     </Typography>
                     <Box sx={{
                       display: 'flex',

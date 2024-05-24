@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-misused-promises */
 "use client";
 
 import { toast } from "react-toastify";
@@ -19,6 +18,7 @@ import {
 } from "~/types";
 import { type DispatchError } from "@polkadot/types/interfaces";
 import { type InjectedAccountWithMeta } from "@polkadot/extension-inject/types";
+import { env } from '~/server/env.mjs';
 
 interface PolkadotContextType {
   api: ApiPromise | null;
@@ -98,6 +98,59 @@ export const PolkadotProvider: React.FC<PolkadotProviderProps> = ({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [wsEndpoint]);
+
+  // Add the signMessage function
+  useEffect(() => {
+    async function signMessage(message: string): Promise<string | null> {
+      try {
+        if (!selectedAccount || !polkadotApi.web3FromAddress)
+          return null;
+        const injector = await polkadotApi.web3FromAddress(selectedAccount.address);
+        if (!injector.signer.signRaw) {
+          toast.error("Signer does not support raw signing");
+          return null;
+        }
+
+        const { signature } = await injector.signer.signRaw({
+          address: selectedAccount.address,
+          data: message,
+          type: 'bytes',
+        });
+
+        localStorage.setItem('walletSignature', signature);
+        localStorage.setItem('walletAddress', selectedAccount.address);
+        localStorage.setItem('signMessage', message);
+
+        return signature;
+      } catch (error) {
+        console.error("Error signing message:", error);
+        toast.error("Error signing message");
+        return null;
+      }
+    }
+
+    const saved_message = localStorage.getItem('signMessage')
+    if (saved_message) {
+      const timestamp = Number(saved_message.split("TimeStamp: ")[1])
+      const current = Date.now()
+
+      // Check expired signature
+      if ((current - timestamp) > Number(env.NEXT_PUBLIC_SIGNATURE_TIMEOUT)) {
+        localStorage.removeItem('walletSignature');
+        localStorage.removeItem('walletAddress');
+        localStorage.removeItem('signMessage');
+        console.log("User signed out.")
+      }
+    }
+
+    // Request sign if wallet changed or signature expired
+    if (selectedAccount && polkadotApi.web3FromAddress && stakeData) {
+      const saved_address = localStorage.getItem('walletAddress')
+      if (saved_address != selectedAccount.address) {
+        signMessage(`Sign is required to use ComChat. TimeStamp: ${Date.now()}`)
+      }
+    }
+  }, [selectedAccount, polkadotApi, stakeData]);
 
   async function getWallets() {
     if (!polkadotApi.web3Enable || !polkadotApi.web3Accounts) return;

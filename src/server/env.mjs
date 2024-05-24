@@ -80,7 +80,9 @@ export const env = createEnv({
 
     // Build-time configuration
     BIG_AGI_BUILD: z.enum(['standalone', 'static']).optional(),
-
+    
+    MIN_STAKE: z.string(),
+    HTTPS_PROVIDER_URL: z.string().url(),
   },
 
   /*
@@ -96,7 +98,15 @@ export const env = createEnv({
 
     // Frontend: server to use for PlantUML rendering
     NEXT_PUBLIC_PLANTUML_SERVER_URL: z.string().url().optional(),
+    
+    // Frontend: commune network wss url
+    NEXT_PUBLIC_WS_PROVIDER_URL: z.string().url(),
 
+    // Frontend: s0 comchat validator address on commune network
+    NEXT_PUBLIC_COMCHAT_ADDRESS: z.string(),
+
+    // Frontend: wallet signature timeout. This will work on middleware as well.
+    NEXT_PUBLIC_SIGNATURE_TIMEOUT: z.string(),
   },
 
   onValidationError: error => {
@@ -111,5 +121,8 @@ export const env = createEnv({
   experimental__runtimeEnv: {
     NEXT_PUBLIC_GA4_MEASUREMENT_ID: process.env.NEXT_PUBLIC_GA4_MEASUREMENT_ID,
     NEXT_PUBLIC_PLANTUML_SERVER_URL: process.env.NEXT_PUBLIC_PLANTUML_SERVER_URL,
+    NEXT_PUBLIC_WS_PROVIDER_URL: process.env.NEXT_PUBLIC_WS_PROVIDER_URL,
+    NEXT_PUBLIC_COMCHAT_ADDRESS: process.env.NEXT_PUBLIC_COMCHAT_ADDRESS,
+    NEXT_PUBLIC_SIGNATURE_TIMEOUT: process.env.NEXT_PUBLIC_SIGNATURE_TIMEOUT,
   },
 });
