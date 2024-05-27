@@ -81,7 +81,6 @@ export const env = createEnv({
     // Build-time configuration
     BIG_AGI_BUILD: z.enum(['standalone', 'static']).optional(),
     
-    MIN_STAKE: z.string(),
     HTTPS_PROVIDER_URL: z.string().url(),
   },
 
