@@ -15,14 +15,25 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("POSTGRES_PRISMA_URL") // uses connection pooling
-  directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
+  provider  = "mysql"
+  url       = env("MYSQL_PRISMA_URL") // uses connection pooling
+  directUrl = env("DIRECT_MYSQL_PRISMA_URL")
 }
 
 //
 // Storage of Linked Data
 //
+model History {
+  id String @id @default(uuid())
+
+  walletAddress String
+  service       String
+  model         String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model LinkStorage {
   id String @id @default(uuid())
 

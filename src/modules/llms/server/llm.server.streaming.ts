@@ -20,7 +20,7 @@ import { OLLAMA_PATH_CHAT, ollamaAccess, ollamaAccessSchema, ollamaChatCompletio
 // OpenAI server imports
 import type { OpenAIWire } from './openai/openai.wiretypes';
 import { openAIAccess, openAIAccessSchema, openAIChatCompletionPayload, OpenAIHistorySchema, openAIHistorySchema, OpenAIModelSchema, openAIModelSchema } from './openai/openai.router';
-
+import { prismaDb } from '~/server/prisma/prismaDb';
 
 // configuration
 const USER_SYMBOL_MAX_TOKENS = '🧱';
@@ -131,6 +131,33 @@ export async function llmStreamingRelayHandler(req: NextRequest): Promise<Respon
   const chatResponseStream =
     (upstreamResponse.body || createEmptyReadableStream())
       .pipeThrough(transformUpstreamToBigAgiClient);
+
+
+  const address = req.headers.get('address');
+
+  if (!address) {
+    return new NextResponse(`Wallet is not connected.`, {
+      status: 401,
+    });
+  }
+
+  const { id: objectId, ...rest } = await prismaDb.history.create({
+    select: {
+      id: true,
+      createdAt: true,
+    },
+    data: {
+      walletAddress: address,
+      service: access.dialect,
+      model: model.id
+    },
+  });
+
+  if (!objectId) {
+    return new NextResponse(`History is not saved`, {
+      status: 400,
+    });
+  }
 
   return new NextResponse(chatResponseStream, {
     status: 200,

@@ -10,6 +10,7 @@ import { NextResponse } from 'next/server';
 import { cryptoWaitReady, signatureVerify } from '@polkadot/util-crypto';
 import fetch from 'node-fetch';
 import { env } from '~/server/env.mjs';
+import { prismaDb } from '~/server/prisma/prismaDb';
 
 // noinspection JSUnusedGlobalSymbols
 export async function middleware(req: NextRequest) {
@@ -34,7 +35,7 @@ export async function middleware(req: NextRequest) {
         status: 401,
       });
     }
-    
+
     // Check expired signature
     const timestamp = Number(message.split("TimeStamp: ")[1])
     const current = Date.now()
@@ -68,10 +69,24 @@ export async function middleware(req: NextRequest) {
 
     const responseData = await response.json();
     const stake_data = responseData["result"]["stats"]["stake_from"].find((item: any) => item[0] === address);
-    const stake_amount = stake_data ? stake_data[1] : null;
+    const stake_amount = stake_data ? stake_data[1] / 1_000_000_000 : 0;
 
-    if (stake_amount < Number(env.MIN_STAKE) * 1000000000) {
-      return new NextResponse(`Your staking amount is under 10000 COMAI. Please increase your staking amount.`, {
+    const now = new Date();
+    const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+    const history_count = await prismaDb.history.count({
+      where: {
+        walletAddress: address,
+        createdAt: {
+          gte: oneDayAgo,
+        },
+      },
+    });
+
+    const rate_limit = Math.floor(stake_amount / 50)
+
+    if (rate_limit < history_count) {
+      return new NextResponse(`You have exceeded the rate limit. Your rate limit: ${rate_limit} calls/day. Please increase your staking amount.`, {
         status: 400,
       });
     }
