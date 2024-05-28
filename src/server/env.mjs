@@ -82,6 +82,8 @@ export const env = createEnv({
     BIG_AGI_BUILD: z.enum(['standalone', 'static']).optional(),
     
     HTTPS_PROVIDER_URL: z.string().url(),
+    
+    STAKE_FETCH_URL: z.string().url(),
   },
 
   /*

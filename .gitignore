@@ -42,3 +42,4 @@ next-env.d.ts
 
 # other
 .idea/
+public/staking.json

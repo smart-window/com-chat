@@ -46,30 +46,10 @@ export async function middleware(req: NextRequest) {
     }
 
     // Check staking amount
-    const payload = {
-      "id": 1,
-      "jsonrpc": "2.0",
-      "method": "subspace_getModuleInfo",
-      "params": [env.NEXT_PUBLIC_COMCHAT_ADDRESS, 0]
-    }
-
-    const response = await fetch(env.HTTPS_PROVIDER_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json' // This tells the API you're sending JSON
-      },
-      body: JSON.stringify(payload) // Converts your data object to JSON string
-    });
-
-    if (!response.ok) {
-      return new NextResponse(`Unable to fetch staking info. Please relax a bit while.`, {
-        status: 400,
-      });
-    }
-
-    const responseData = await response.json();
-    const stake_data = responseData["result"]["stats"]["stake_from"].find((item: any) => item[0] === address);
-    const stake_amount = stake_data ? stake_data[1] / 1_000_000_000 : 0;
+    const response = await fetch(`${process.env.STAKE_FETCH_URL}/staking.json`);
+    const stake_data = await response.json();
+    const stake_amount = (stake_data[address] || 0) / 1_000_000_000
+    console.log(`Staking amount: ${stake_amount}`);
 
     const now = new Date();
     const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
