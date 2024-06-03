@@ -11,7 +11,7 @@
 //  - the 'sharing' function, to let users share the chats with each other
 
 generator client {
-  provider = "prisma-client-js"
+  provider   = "prisma-client-js"
   engineType = "library"
 }
 
@@ -30,6 +30,16 @@ model History {
   walletAddress String
   service       String
   model         String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Api {
+  id String @id @default(uuid())
+
+  walletAddress String @unique
+  apiKey        String @unique
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

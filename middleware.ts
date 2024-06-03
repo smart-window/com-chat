@@ -45,30 +45,34 @@ export async function middleware(req: NextRequest) {
       });
     }
 
-    // Check staking amount
-    const response = await fetch(`${process.env.STAKE_FETCH_URL}/staking.json`);
-    const stake_data = await response.json();
-    const stake_amount = (stake_data[address] || 0) / 1_000_000_000
-    console.log(`Staking amount: ${stake_amount}`);
+    // Skip staking check if request is key generation or get key
+    const path = req.nextUrl.pathname;
+    if (path !== "/api/key/generate" && path !== "/api/key/get") {
+      // Check staking amount
+      const response = await fetch(`${process.env.STAKE_FETCH_URL}/staking.json`);
+      const stake_data = await response.json();
+      const stake_amount = (stake_data[address] || 0) / 1_000_000_000
+      console.log(`Staking amount: ${stake_amount}`);
 
-    const now = new Date();
-    const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+      const now = new Date();
+      const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
 
-    const history_count = await prismaDb.history.count({
-      where: {
-        walletAddress: address,
-        createdAt: {
-          gte: oneDayAgo,
+      const history_count = await prismaDb.history.count({
+        where: {
+          walletAddress: address,
+          createdAt: {
+            gte: oneDayAgo,
+          },
         },
-      },
-    });
-
-    const rate_limit = Math.floor(stake_amount / 50)
-
-    if (rate_limit < history_count) {
-      return new NextResponse(`You have exceeded the rate limit. Your rate limit: ${rate_limit} calls/day. Please increase your staking amount.`, {
-        status: 400,
       });
+
+      const rate_limit = Math.floor(stake_amount / 50)
+
+      if (rate_limit < history_count) {
+        return new NextResponse(`You have exceeded the rate limit. Your rate limit: ${rate_limit} calls/day. Please increase your staking amount.`, {
+          status: 400,
+        });
+      }
     }
 
     return NextResponse.next();
@@ -98,6 +102,8 @@ export const config = {
     // Include API routes
     // '/api(.*)',
     '/api/llms/stream',
+    '/api/key/generate',
+    '/api/key/get',
     // Note: this excludes _next, /images etc..
   ],
 };
