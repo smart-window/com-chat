@@ -29,12 +29,15 @@ const fetchStaking = async () => {
     const responseData = await response.json();
     const stake_from = responseData["result"]["stats"]["stake_from"]
 
-    const result = {}
-    for (const index in stake_from) {
-
-        const key = stake_from[index][0]
-        const staking = stake_from[index][1]
-        result[key] = staking
+    var result = {}
+    if (Array.isArray(stake_from)) {
+        for (const index in stake_from) {
+            const key = stake_from[index][0]
+            const staking = stake_from[index][1]
+            result[key] = staking
+        }
+    } else {
+        result = stake_from
     }
 
     // Convert the result object to a JSON string

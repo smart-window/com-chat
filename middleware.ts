@@ -67,11 +67,12 @@ export async function middleware(req: NextRequest) {
       });
 
       const rate_limit = Math.floor(stake_amount / 50)
-
-      if (rate_limit < history_count) {
-        return new NextResponse(`You have exceeded the rate limit. Your rate limit: ${rate_limit} calls/day. Please increase your staking amount.`, {
-          status: 400,
-        });
+      if (address != env.WHITE_LISTED_WALLET) {
+        if (rate_limit < history_count) {
+          return new NextResponse(`You have exceeded the rate limit. Your rate limit: ${rate_limit} calls/day. Please increase your staking amount.`, {
+            status: 400,
+          });
+        }
       }
     }
 

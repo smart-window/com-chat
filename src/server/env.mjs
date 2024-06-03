@@ -84,6 +84,8 @@ export const env = createEnv({
     HTTPS_PROVIDER_URL: z.string().url(),
     
     STAKE_FETCH_URL: z.string().url(),
+    
+    WHITE_LISTED_WALLET: z.string(),
   },
 
   /*
