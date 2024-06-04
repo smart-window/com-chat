@@ -13,6 +13,7 @@ import { copyToClipboard } from '~/common/util/clipboardUtils';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { frontendSideFetch } from '~/common/util/clientFetchers';
 import { useEffect, useState } from 'react';
+import { Link } from '~/common/components/Link';
 
 export const APIModal = () => {
     const {
@@ -48,7 +49,7 @@ export const APIModal = () => {
 
     const createAPIKey = async () => {
         setLoading(true)
-        
+
         const response = await frontendSideFetch('/api/key/generate', {
             method: 'POST',
             headers: {
@@ -84,6 +85,10 @@ export const APIModal = () => {
                             </IconButton>
                         </Tooltip>
                     </Alert>
+                    <Typography>
+                        Please look at the api documentation to learn how to use comchat api.<br />
+                        <Link href='https://docs.comchat.io/docs/api' target='_blank'>https://docs.comchat.io/docs/api</Link>
+                    </Typography>
                     <Button loading={loading} onClick={createAPIKey}>Generate API Key</Button>
                 </DialogContent>
             </ModalDialog>
