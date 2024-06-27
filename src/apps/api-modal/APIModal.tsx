@@ -87,7 +87,7 @@ export const APIModal = () => {
                     </Alert>
                     <Typography>
                         Please look at the api documentation to learn how to use comchat api.<br />
-                        <Link href='https://docs.comchat.io/docs/api' target='_blank'>https://docs.comchat.io/docs/api</Link>
+                        <Link href='https://docs.comchat.ai/docs/api' target='_blank'>https://docs.comchat.ai/docs/api</Link>
                     </Typography>
                     <Button loading={loading} onClick={createAPIKey}>Generate API Key</Button>
                 </DialogContent>

@@ -9,8 +9,8 @@ const app = next({ dev });
 const handle = app.getRequestHandler();
 
 const httpsOptions = {
-    key: fs.readFileSync("./privkey.pem"),
-    cert: fs.readFileSync("./fullchain.pem"),
+    key: fs.readFileSync(process.env.PRIVKEY_PATH),
+    cert: fs.readFileSync(process.env.FULLCHAIN_PATH),
 };
 
 const port = 443
