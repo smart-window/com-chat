@@ -4,6 +4,8 @@ const { createServer } = require("https");
 const http = require("http");
 const { parse } = require("url");
 
+require('dotenv').config();
+
 const dev = false;
 const app = next({ dev });
 const handle = app.getRequestHandler();
